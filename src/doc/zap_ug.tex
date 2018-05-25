@@ -5,6 +5,8 @@
 \usepackage{listings}
 \usepackage{longtable}
 
+\renewcommand{\familydefault}{\sfdefault} 
+
 \title{ZAP Processor User Guide}
 \author{Revanth Kamaraj} 
 
@@ -179,7 +181,7 @@ C files(.c extension) and a linker script(.ld extension) in the directory
 \\
 \\
 Copy the \texttt{makefile} and \texttt{Config.cfg} from one of the existing test case directories 
-to the directory texttt{src/ts/$\langle$TestCase$\rangle$/}. Edit the \texttt{Config.cfg} to suit the testcase.
+to the directory \texttt{src/ts/$\langle$TestCase$\rangle$/}. Edit the \texttt{Config.cfg} to suit the testcase.
 \\
 \\
 To run simulations using the scripts provided, you will need Icarus 
@@ -190,7 +192,12 @@ waveform dumps can be found in the \texttt{obj/ts/$\langle$TestCase$\rangle$/} d
 Enter \texttt{src/ts/$\langle$TestCase$\rangle$} and type \texttt{make}.
 \\
 \\
-To clean object files, enter \texttt{src/ts/$\langle$TestCase$\rangle$} and type \texttt{make clean}.
+NOTE: Normally C files are directly converted to object files. To view the assembly code for a C file (say file.c), do \texttt{make c2asm X=file.c}.
+This will create a file called \texttt{file.c.asm} in the corresponding object directory.
+\\
+NOTE: To clean object files, enter \texttt{src/ts/$\langle$TestCase$\rangle$} and type \texttt{make clean}.
+\\
+NOTE: To clean object files and the extracted GCC files, enter \texttt{src/ts/$\langle$TestCase$\rangle$} and type \texttt{make cleanall}.
 \\
 \\
 NOTE: You can set the testbench and processor configuration in the \texttt{Config.cfg} 
@@ -232,12 +239,14 @@ DEFINE_TLB_DEBUG  => 0,     # Make this 1 to define
 
 # Make this an anonymous has with entries like 
 # "r10" => "32'h0" etc. These represent register 
-# values at the end of simulation.
+# values (expected) at the end of simulation.
 REG_CHECK                   => {"r1" => "32'h4", 
                                 "r2" => "32'd3"},      
 
 # Make this an anonymous hash with entries like 
-# verilog_address => verilog_value etc.
+# verilog_address => verilog_value etc. These 
+# represent expected  memory values at the end of 
+# simulation.
 FINAL_CHECK                 => {"32'h100" => "32'd4", 
                                 "32'h66" => "32'h4"}       
 );
