@@ -227,6 +227,7 @@ SYNTHESIS                => 1,   # Make this to 1 to simulate compile
                                  # from a synthesis perspective.
 
 # Testbench configuration.
+IRQ_EN            => 1,     # 1 Enables VIC connection to CPU in testbench.
 UART_TX_TERMINAL  => 0,     # 1 Enables UART TX terminal. 0 disables it.
 EXT_RAM_SIZE      => 32768, # External RAM size in bytes.
 SEED              => -1,    # Seed. Use -1 to use random seed.
