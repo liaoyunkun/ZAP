@@ -11,7 +11,7 @@ management capabilities. The processor core uses a 10 stage pipeline.
 
 ### Current Status 
 
-*Experimental. This was a student project and is no longer being actively developed.*
+*Very experimental. This was a student project and is no longer being actively developed or maintained.*
 
 ### Bugs and Known Issues
 
