@@ -43,7 +43,7 @@ Please see the PDF file at *doc/ZAP_PROCESSOR_CORE_DATASHEET.pdf*
 
 > cd $PROJ_ROOT/src/synth/vivado/  # $PROJ_ROOT is the project directory.
 
-> source run_synth.sh              # Targets 90MHz on Xiling FPGA part xc7a35tiftg256-1L.
+> source run_synth.sh              # Targets 77MHz on Xiling FPGA part xc7a35tiftg256-1L.
 
 ### Features 
 
@@ -51,11 +51,12 @@ Please see the PDF file at *doc/ZAP_PROCESSOR_CORE_DATASHEET.pdf*
  - Store buffer for improved performance.    
  - Can execute ARMv4T code. Note that compressed instruction support is experimental.
  - Wishbone B3 compatible interface. Cache unit supports burst access.
- - 10-stage pipeline design. Pipeline has bypass network to resolve dependencies.
+ - 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
  - 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
  - Branch prediction supported.
  - Split I and D writeback cache (Size can be configured using parameters).
  - Split I and D MMUs (TLB size can be configured using parameters).
  - Base restored abort model to simplify data abort handling.
+ - Cache read hit looked up in a single cycle. Multiple read operations that hit in the cache and TLB will execute at a rate of 1 operation per clock.
                                                                     
 
