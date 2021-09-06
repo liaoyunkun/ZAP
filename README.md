@@ -1,7 +1,7 @@
 ## *ZAP* : An ARMv4T compatible core with cache and MMU
 
 #### Author        : Revanth Kamaraj (revanth91kamaraj@gmail.com)
-#### License       : GPL v2
+#### License       : LGPL
 
 ### Description 
 
@@ -47,22 +47,6 @@ Please see the PDF file at *doc/ZAP_PROCESSOR_CORE_DATASHEET.pdf*
  - Base restored abort model to simplify data abort handling.
 
 ### License
-
-                   (C) 2016-2018 Revanth Kamaraj.                        
-                                                                         
-                   This program is free software; you can redistribute it and/or           
-                   modify it under the terms of the GNU General Public License             
-                   as published by the Free Software Foundation; either version 2          
-                   of the License, or (at your option) any later version.                  
-                                                                                           
-                   This program is distributed in the hope that it will be useful,         
-                   but WITHOUT ANY WARRANTY; without even the implied warranty of          
-                   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           
-                   GNU General Public License for more details.                            
-                                                                                           
-                   You should have received a copy of the GNU General Public License       
-                   along with this program; if not, write to the Free Software             
-                   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA           
-                   02110-1301, USA.                                                        
+  Please see LICENSE file.
                                                                          
 
