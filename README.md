@@ -42,6 +42,7 @@ gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more
 ### Running FPGA Synthesis (Requires Vivado toolchain to be installed)
 
 cd $PROJ_ROOT/src/synth/vivado/  # $PROJ_ROOT is the project directory.
+
 source run_synth.sh              # Targets 90MHz on Xiling FPGA part xc7a35tiftg256-1L.
 
 ### Features 
