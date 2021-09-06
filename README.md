@@ -1,7 +1,6 @@
 ## *ZAP* : An ARMv4T compatible core with cache and MMU
 
 #### Author        : Revanth Kamaraj (revanth91kamaraj@gmail.com)
-#### License       : LGPL v2.1
 
 ### Description 
 
@@ -45,18 +44,5 @@ Please see the PDF file at *doc/ZAP_PROCESSOR_CORE_DATASHEET.pdf*
  - Split I and D writeback cache (Size can be configured using parameters).
  - Split I and D MMUs (TLB size can be configured using parameters).
  - Base restored abort model to simplify data abort handling.
-
-### License
-                    GNU LESSER GENERAL PUBLIC LICENSE
-                       Version 2.1, February 1999
-
- Copyright (C) 1991, 1999 Free Software Foundation, Inc.
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
-
-[This is the first released version of the Lesser GPL.  It also counts
- as the successor of the GNU Library Public License, version 2, hence
- the version number 2.1.]
-                                                                         
+                                                                    
 
