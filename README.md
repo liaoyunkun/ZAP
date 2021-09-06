@@ -27,23 +27,23 @@ Please see the PDF file at *doc/ZAP_PROCESSOR_CORE_DATASHEET.pdf*
 
 ### Getting Started
 
-sudo apt-get install sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd iverilog gtkwave
+> sudo apt-get install sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd iverilog gtkwave
 
-cd $PROJ_ROOT/src/ts/<test_name> # $PROJ_ROOT is the project directory.
+> cd $PROJ_ROOT/src/ts/<test_name> # $PROJ_ROOT is the project directory.
 
-make
+> make
 
-cd $PROJ_ROOT/obj/<test_name>
+> cd $PROJ_ROOT/obj/<test_name>
 
-gvim zap.log.gz
+> gvim zap.log.gz
 
-gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more information.
+> gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more information.
 
 ### Running FPGA Synthesis (Requires Vivado toolchain to be installed)
 
-cd $PROJ_ROOT/src/synth/vivado/  # $PROJ_ROOT is the project directory.
+> cd $PROJ_ROOT/src/synth/vivado/  # $PROJ_ROOT is the project directory.
 
-source run_synth.sh              # Targets 90MHz on Xiling FPGA part xc7a35tiftg256-1L.
+> source run_synth.sh              # Targets 90MHz on Xiling FPGA part xc7a35tiftg256-1L.
 
 ### Features 
 
