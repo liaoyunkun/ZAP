@@ -1,12 +1,18 @@
-## The ZAP Soft Processor
+## The ZAP Soft Processor (ARMv4T Compatible)
 
 #### Author        : Revanth Kamaraj (revanth91kamaraj@gmail.com)
 
 ### Description 
 
-ZAP is a pipelined soft processor core for FPGA. 
-* Note that zap_top.v is the CPU top level (What you probably need).
-* chip_top.v is the SOC top level (extendable). 
+ZAP is a pipelined soft processor for FPGA that integrates:
+* A 10-stage pipelined ARMv4T software compliant core (ZAP core)
+* A (CP15 software compliant) cache controller with integrated cache RAMs (inference, block RAMs)
+* A (CP15 software compliant) VM controller with integrated cache RAMs (inference, block RAMs)
+
+### Top Level Modules
+
+* Note that zap_top.v is the processor top level (What you probably need i.e., integrates the core, cache and MMU).
+* chip_top.v is the SOC top level that integrates the ZAP processor, 2 x timers, a UART and a VIC. The SOC fabric is extendable.
 
 ### Instruction Sets Supported
 
@@ -43,6 +49,7 @@ parameter [31:0] CODE_CACHE_SIZE          =  1024  // Cache size in bytes. Must 
 Wishbone B3 compatible 32-bit bus.
 
 ### Getting Started
+
 Let the variable $test_name hold the name of the test. See the src/ts directory for some basic tests pre-installed. Available test names are: factorial, arm_test, thumb_test, uart. New tests can be added using these as starting templates. Please note that these will be run on the SOC platform (chip_top) that consist of the ZAP processor, 2 x UARTs, a VIC and a timer.
 
 ```bash
