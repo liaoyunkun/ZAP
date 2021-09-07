@@ -32,6 +32,7 @@ cd $PROJ_ROOT/obj/$test_name
 gvim zap.log.gz    # View the log file
 gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more information.
 ```
+To use this processor in your SOC, instantiate this top level CPU module in your project: [CPU top file](/src/rtl/cpu/zap_top.v)
 
 ### Running FPGA Synthesis (Requires Vivado toolchain to be installed)
 
@@ -52,8 +53,8 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 | Property              | Description             |
 |-----------------------|-------------------------|
 |HDL                    | Verilog-2001            |
-|v4T ISA Support        | Fully compatible        |
-|v5T ISA Support        | Only BLX, CLZ supported |
+|ARM v4T ISA Support    | Fully compatible        |
+|ARM v5T ISA Support    | Only BLX, CLZ supported |
 |L1 Code Cache          | Direct mapped virtual   |
 |L1 Data Cache          | Direct mapped virtual   |
 |Cache Write Policy     | Writeback               |
