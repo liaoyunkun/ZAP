@@ -4,7 +4,9 @@
 
 ### Description 
 
-ZAP is a pipelined soft processor core for FPGA. Note that zap_top.v is the CPU top level while chip_top.v is the SOC top level (extendable). 
+ZAP is a pipelined soft processor core for FPGA. 
+* Note that zap_top.v is the CPU top level (What you probably need).
+* chip_top.v is the SOC top level (extendable). 
 
 ### Instruction Sets Supported
 
@@ -13,22 +15,41 @@ ZAP is a pipelined soft processor core for FPGA. Note that zap_top.v is the CPU 
 * Limited v5T support. 
   * From the v5T ISA, only supports CLZ and BLX instructions.
 
+### CPU Configuration (zap_top.v)
+```C
+// BP entries, FIFO depths
+
+parameter        BP_ENTRIES              = 1024, // Predictor RAM depth. Must be 2^n and > 2.
+parameter        FIFO_DEPTH              = 4,    // Command FIFO depth. Must be 2^n and > 2.
+parameter        STORE_BUFFER_DEPTH      = 16,   // Depth of the store buffer. Must be 2^n and > 2.
+
+// Data MMU/Cache configuration.
+
+parameter [31:0] DATA_SECTION_TLB_ENTRIES =  4,    // Section TLB entries. Must be 2^n (n > 0).
+parameter [31:0] DATA_LPAGE_TLB_ENTRIES   =  8,    // Large page TLB entries. Must be 2^n (n > 0).
+parameter [31:0] DATA_SPAGE_TLB_ENTRIES   =  16,   // Small page TLB entries. Must be 2^n (n > 0).
+parameter [31:0] DATA_CACHE_SIZE          =  1024, // Cache size in bytes. Must be at least 256B and 2^n.
+
+// Code MMU/Cache configuration.
+
+parameter [31:0] CODE_SECTION_TLB_ENTRIES =  4,    // Section TLB entries. Must be 2^n (n > 0).
+parameter [31:0] CODE_LPAGE_TLB_ENTRIES   =  8,    // Large page TLB entries. Must be 2^n (n > 0).
+parameter [31:0] CODE_SPAGE_TLB_ENTRIES   =  16,   // Small page TLB entries. Must be 2^n (n > 0).
+parameter [31:0] CODE_CACHE_SIZE          =  1024  // Cache size in bytes. Must be at least 256B and 2^n.
+```
+
 ### Bus Interface 
  
 Wishbone B3 compatible 32-bit bus.
 
-### Documentation
-
-[View PDF](/doc/ZAP_PROCESSOR_CORE_DATASHEET.pdf)
-
 ### Getting Started
-Let the variable $test_name hold the name of the test. See the src/ts directory for some basic tests pre-installed. Available test names are: factorial, arm_test, thumb_test, uart.
+Let the variable $test_name hold the name of the test. See the src/ts directory for some basic tests pre-installed. Available test names are: factorial, arm_test, thumb_test, uart. New tests can be added using these as starting templates. Please note that these will be run on the SOC platform (chip_top) that consist of the ZAP processor, 2 x UARTs, a VIC and a timer.
 
 ```bash
 sudo apt-get install sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd iverilog gtkwave
 cd $PROJ_ROOT/src/ts/$test_name # $PROJ_ROOT is the project directory.
 make # Runs the test using IVerilog.
-cd $PROJ_ROOT/obj/$test_name
+cd $PROJ_ROOT/obj/ts/$test_name
 gvim zap.log.gz    # View the log file
 gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more information.
 ```
