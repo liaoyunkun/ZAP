@@ -65,6 +65,7 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |Memory Interface       | 32-bit Wishbone B3      |
 |Abort Model            | Base Restored           |
 |Integrated v4T CP15    | Yes                     |
+|External Coproc. Bus   | No                      |
 
  * 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
  * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
