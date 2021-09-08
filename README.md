@@ -22,6 +22,7 @@ The ZAP core is a 10 stage pipelined processor for FPGA with the following speci
 |Integrated v4T CP15    | Yes                     |
 |External Coproc. Bus   | No                      |
 |Cache Interface        | 128-Bit custom interface|
+|26-Bit Support         | No                      |
 
  * 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
  * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
@@ -154,7 +155,7 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |3    | W         | Always 1. Write Buffer always ON         |
 |4    | P         | Always 1. RESERVED                       | 
 |5    | D         | Always 1. RESERVED                       |
-|6    | L         | Always 1. RESERVED                       |
+|6    | L         | Always 0. RESERVED                       |
 |7    | B         | Always 0. Little Endian                  |
 |8    | S         | The S bit                                |
 |9    | R         | The R bit                                |
