@@ -4,15 +4,75 @@
 
 ### Description 
 
-ZAP is a pipelined soft processor for FPGA that integrates:
+The ZAP core is a 10 stage pipelined processor for FPGA with the following specifications:
+
+#### Specifications 
+
+##### ZAP Core (zap_core.v)
+
+| Property              | Description             |
+|-----------------------|-------------------------|
+|HDL                    | Verilog-2001            |
+|Author                 | Revanth Kamaraj         |
+|ARM v4T ISA Support    | Fully compatible        |
+|ARM v5T ISA Support    | Only BLX, CLZ supported |
+|Branch Predictor       | Direct mapped bimodal   |
+|Write Buffer           | Yes                     |
+|Abort Model            | Base Restored           |
+|Integrated v4T CP15    | Yes                     |
+|External Coproc. Bus   | No                      |
+|Cache Interface        | 128-Bit custom interface|
+
+ * 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
+ * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
+
+##### ZAP Processor (zap_top.v)
+
+ZAP is a pipelined soft processor for FPGA that contains:
 * A 10-stage pipelined ARMv4T software compliant core (ZAP core)
 * A (CP15 software compliant) cache controller with integrated cache RAMs (inference, block RAMs)
 * A (CP15 software compliant) VM controller with integrated cache RAMs (inference, block RAMs)
 
-### Top Level Modules
+| Property              | Description             |
+|-----------------------|-------------------------|
+|HDL                    | Verilog-2001            |
+|Author                 | Revanth Kamaraj         |
+|L1 Code Cache          | Direct mapped virtual   |
+|L1 Data Cache          | Direct mapped virtual   |
+|Cache Write Policy     | Writeback               |
+|L1 Code TLB            | Direct mapped           |
+|L1 Data TLB            | Direct mapped           |
+|Bus Interface          | 32-bit Wishbone B3      |
+|Cache/TLB Lock Support | No                      |
 
-* Note that zap_top.v is the processor top level (What you probably need i.e., integrates the core, cache and MMU).
-* chip_top.v is the SOC top level that integrates the ZAP processor, 2 x timers, a UART and a VIC. The SOC fabric is extendable.
+##### Test SOC (chip_top.v)
+
+The SOC integrates:
+* The ZAP processor
+* 2 x Timers
+* 1 x VIC
+* 2 x UARTs (UART is the only external IP used in this project, and is taken from OpenCores)
+ 
+```Verilog
+// Peripheral addresses.
+localparam UART0_LO                     = 32'hFFFFFFE0;
+localparam UART0_HI                     = 32'hFFFFFFFF;
+localparam TIMER0_LO                    = 32'hFFFFFFC0;
+localparam TIMER0_HI                    = 32'hFFFFFFDF;
+localparam VIC_LO                       = 32'hFFFFFFA0;
+localparam VIC_HI                       = 32'hFFFFFFBF;
+localparam UART1_LO                     = 32'hFFFFFF80;
+localparam UART1_HI                     = 32'hFFFFFF9F;
+localparam TIMER1_LO                    = 32'hFFFFFF60;
+localparam TIMER1_HI                    = 32'hFFFFFF7F;
+```
+
+### System Integration
+
+The project offers three flavors based on your need:
+* zap_core.v is the bare processor core without cache and MMU, with a custom 128-bit cache interface.
+* zap_top.v is the processor top level (What you probably need i.e., integrates the core, cache and MMU).
+* chip_top.v is the SOC top level that integrates the ZAP processor, 2 x timers, 2 x UARTs and a VIC. The SOC fabric is Wishbone and is extendable.
 
 ### Instruction Sets Supported
 
@@ -22,7 +82,7 @@ ZAP is a pipelined soft processor for FPGA that integrates:
   * From the v5T ISA, only supports CLZ and BLX instructions.
 
 ### CPU Configuration (zap_top.v)
-```C
+```Verilog
 // BP entries, FIFO depths
 
 parameter        BP_ENTRIES              = 1024, // Predictor RAM depth. Must be 2^n and > 2.
@@ -76,28 +136,83 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |--------------------|-------|----------------|
 | xc7a35tiftg256-1L  | 80MHz | Cache access   |
 
-### Specifications 
+### CP15 Control Registers
 
-| Property              | Description             |
-|-----------------------|-------------------------|
-|HDL                    | Verilog-2001            |
-|ARM v4T ISA Support    | Fully compatible        |
-|ARM v5T ISA Support    | Only BLX, CLZ supported |
-|L1 Code Cache          | Direct mapped virtual   |
-|L1 Data Cache          | Direct mapped virtual   |
-|Cache Write Policy     | Writeback               |
-|Branch Predictor       | Direct mapped bimodal   |
-|L1 Code TLB            | Direct mapped           |
-|L1 Data TLB            | Direct mapped           |
-|Cache/TLB Lock Support | No                      |
-|Write Buffer           | Yes                     |
-|Memory Interface       | 32-bit Wishbone B3      |
-|Abort Model            | Base Restored           |
-|Integrated v4T CP15    | Yes                     |
-|External Coproc. Bus   | No                      |
+#### Register 0 : ID Register
 
- * 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
- * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
+|Bits | Name | Description                              |
+|-----|------|------------------------------------------|
+|23:16| ID   | Reads 0x0 signifying a v4 implementation |
+
+#### Register 1 : Control
+
+|Bits | Name      | Description                              |
+|-----|-----------|------------------------------------------|
+|0    | M         | MMU Enable. Active high                  |
+|1    | A         | Always 0. Alignment check off            |
+|2    | D         | Data Cache Enable. Active high           |
+|3    | W         | Always 1. Write Buffer always ON         |
+|4    | P         | Always 1. RESERVED                       | 
+|5    | D         | Always 1. RESERVED                       |
+|6    | L         | Always 1. RESERVED                       |
+|7    | B         | Always 0. Little Endian                  |
+|8    | S         | The S bit                                |
+|9    | R         | The R bit                                |
+|11   | Z         | Always 1. Branch prediction enabled      |
+|12   | I         | Instruction Cache Enable. Active high    |
+|13   | V         | Normal Exception Vectors. Always 0       |
+|14   | RR        | Always 1. Direct mapped cache.           |
+|15   | L4        | Always 0. Normal behavior.               |
+
+#### Register 2 : Translation Base Address
+
+|Bits | Name      | Description                              |
+|-----|-----------|------------------------------------------|
+|13:0 | M         | Preserve value.                          |
+|31:14| TTB       | Upper 18-bits of translation address     |
+
+#### Register 3 : Domain Access Control (X=0 to X=15)
+
+|Bits     | Name      | Description                              |
+|---------|-----------|------------------------------------------|
+|2X+1:2X  | DX        | DX access permission.                    |
+
+#### Register 5 : Fault Status Register
+
+|Bits | Name      | Description                              |
+|-----|-----------|------------------------------------------|
+|3:0  | Status    | Status.                                  |
+|1:0  | Domain    | Domain.                                  |
+|11:8 | SBZ       | Always 0. RESERVED                       |
+
+#### Register 6 : Fault Address Register
+
+|Bits | Name      | Description                              |
+|-----|-----------|------------------------------------------|
+|31:0 | Addr      | Fault Address.                           |
+
+#### Register 7 : Cache Functions
+
+| Opcode2     |  CRm         | Description  |
+|-------------|--------------|--------------|
+|         000 |         0111 |         Flush all caches. |
+|         000 |         0101 |         Flush I cache.    |
+|         000 |         0110 |         Flush D cache.    |
+|         000 |         1011 |         Clean all caches. |
+|         000 |         1010 |         Clean D cache.    |
+|         000 |         1111 |         Clean and flush all caches. |
+|         000 |         1110 |         Clean and flush D cache.    |
+         
+#### Register 8 : TLB Functions
+
+|Opcode2 |        CRm  |        Description      |
+|--------|-------------|-------------------------|        
+|    000 |        0111 |        Flush all TLBs   |
+|    000 |        0101 |        Flush I TLB      |
+|    000 |        0110 |        Flush D TLB      |
+
+
+
 
                                                                     
 
