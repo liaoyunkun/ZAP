@@ -48,7 +48,7 @@ parameter [31:0] CODE_CACHE_SIZE          =  1024  // Cache size in bytes. Must 
  
 Wishbone B3 compatible 32-bit bus.
 
-### Getting Started
+### Getting Started (Tested on Ubuntu 16.04 LTS/18.04 LTS)
 
 Let the variable $test_name hold the name of the test. See the src/ts directory for some basic tests pre-installed. Available test names are: factorial, arm_test, thumb_test, uart. New tests can be added using these as starting templates. Please note that these will be run on the SOC platform (chip_top) that consist of the ZAP processor, 2 x UARTs, a VIC and a timer.
 
@@ -62,7 +62,7 @@ gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more
 ```
 To use this processor in your SOC, instantiate this top level CPU module in your project: [CPU top file](/src/rtl/cpu/zap_top.v)
 
-### Running FPGA Synthesis (Requires Vivado toolchain to be installed)
+### Running FPGA Synthesis (Requires Vivado toolchain to be installed, Tested on Ubuntu 16.04 LTS/18.04 LTS)
 
 Download and install Vivado WebPACK from https://www.xilinx.com/member/forms/download/xef-vivado.html?filename=Xilinx_Vivado_SDK_Web_2018.3_1207_2324_Lin64.bin 
 ```bash
