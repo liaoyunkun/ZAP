@@ -4,7 +4,7 @@
 
 ### Description 
 
-The ZAP core is a 10 stage pipelined processor for FPGA with the following specifications:
+The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (v4 compliant).
 
 #### Specifications 
 
@@ -43,8 +43,9 @@ ZAP is a pipelined soft processor for FPGA that contains:
 |Cache Write Policy     | Writeback               |
 |L1 Code TLB            | Direct mapped           |
 |L1 Data TLB            | Direct mapped           |
-|Bus Interface          | 32-bit Wishbone B3      |
+|Bus Interface          | 32-bit Wishbone B3 (Linear incrementing burst)     |
 |Cache/TLB Lock Support | No                      |
+|CP15 Compliance        | v4                      |
 
 ##### Test SOC (chip_top.v)
 
@@ -53,6 +54,8 @@ The SOC integrates:
 * 2 x Timers
 * 1 x VIC
 * 2 x UARTs (UART is the only external IP used in this project, and is taken from OpenCores)
+
+Provides an external 32-bit Wishbone bus to connect FPGA SRAM. Note that CTI and BTE are not exposed in the SOC SRAM interface.
  
 ```Verilog
 // Peripheral addresses.
@@ -78,11 +81,12 @@ The project offers three flavors based on your need:
 ### Instruction Sets Supported
 
 * 16/32-bit ARM v4T ISA support 
-* Integrated CP15 coprocessor (v4T compliant Cache Controller and MMU)
+* Integrated CP15 coprocessor (v4 compliant Cache Controller and MMU)
 * Limited v5T support. 
   * From the v5T ISA, only supports CLZ and BLX instructions.
 
 ### CPU Configuration (zap_top.v)
+
 ```Verilog
 // BP entries, FIFO depths
 
@@ -105,9 +109,52 @@ parameter [31:0] CODE_SPAGE_TLB_ENTRIES   =  16,   // Small page TLB entries. Mu
 parameter [31:0] CODE_CACHE_SIZE          =  1024  // Cache size in bytes. Must be at least 256B and 2^n.
 ```
 
-### Bus Interface 
+### CPU IO Interface (zap_top.v)
  
 Wishbone B3 compatible 32-bit bus.
+
+```Verilog
+        // --------------------------------------
+        // Clock and reset
+        // --------------------------------------
+
+        input   wire            i_clk,
+        input   wire            i_reset,
+
+        // ---------------------------------------
+        // Interrupts. 
+        // Both of them are active high and level 
+        // trigerred.
+        // ---------------------------------------
+
+        input   wire            i_irq,
+        input   wire            i_fiq,
+
+        // ---------------------
+        // Wishbone interface.
+        // ---------------------
+
+        output  wire            o_wb_cyc,
+        output  wire            o_wb_stb,
+        output  wire [31:0]     o_wb_adr,
+        output  wire            o_wb_we,
+        output wire  [31:0]     o_wb_dat,
+        output  wire [3:0]      o_wb_sel,
+        output wire [2:0]       o_wb_cti,  // Cycle Type Indicator (Supported modes: Incrementing Burst, End of Burst).
+        output wire [1:0]       o_wb_bte,  // Burst Type Indicator (Supported modes: Linear)
+        input   wire            i_wb_ack,
+        input   wire [31:0]     i_wb_dat,
+        
+        // ------------------------
+        // IGNORE
+        // ------------------------
+        
+        // Please ignore these.
+        output  wire            o_wb_stb_nxt,
+        output  wire            o_wb_cyc_nxt,
+        output wire  [31:0]     o_wb_adr_nxt
+```
+
 
 ### Getting Started (Tested on Ubuntu 16.04 LTS/18.04 LTS)
 
@@ -125,6 +172,8 @@ To use this processor in your SOC, instantiate this top level CPU module in your
 
 ### Running FPGA Synthesis (Requires Vivado toolchain to be installed, Tested on Ubuntu 16.04 LTS/18.04 LTS)
 
+This will synthesize the SOC, and not just the processor core.
+
 Download and install Vivado WebPACK from https://www.xilinx.com/member/forms/download/xef-vivado.html?filename=Xilinx_Vivado_SDK_Web_2018.3_1207_2324_Lin64.bin 
 ```bash
 cd $PROJ_ROOT/src/synth/vivado/  # $PROJ_ROOT is the project directory.
@@ -137,13 +186,15 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |--------------------|-------|----------------|
 | xc7a35tiftg256-1L  | 80MHz | Cache access   |
 
-### CP15 Control Registers
+### CP15 Control Registers (v4 Cache + MMU Control)
 
 #### Register 0 : ID Register
 
 |Bits | Name | Description                              |
 |-----|------|------------------------------------------|
+|31:24| --   | RESERVED                                 |
 |23:16| ID   | Reads 0x0 signifying a v4 implementation |
+|15:0 | --   | RESERVED                                 |
 
 #### Register 1 : Control
 
@@ -155,7 +206,7 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |3    | W         | Always 1. Write Buffer always ON         |
 |4    | P         | Always 1. RESERVED                       | 
 |5    | D         | Always 1. RESERVED                       |
-|6    | L         | Always 0. RESERVED                       |
+|6    | --        | RESERVED                                 |
 |7    | B         | Always 0. Little Endian                  |
 |8    | S         | The S bit                                |
 |9    | R         | The R bit                                |
@@ -194,13 +245,13 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 
 #### Register 7 : Cache Functions
 
-| Opcode2     |  CRm         | Description  |
-|-------------|--------------|--------------|
-|         000 |         0111 |         Flush all caches. |
-|         000 |         0101 |         Flush I cache.    |
-|         000 |         0110 |         Flush D cache.    |
-|         000 |         1011 |         Clean all caches. |
-|         000 |         1010 |         Clean D cache.    |
+| Opcode2     |  CRm         | Description                         |
+|-------------|--------------|-------------------------------------|
+|         000 |         0111 |         Flush all caches.           |
+|         000 |         0101 |         Flush I cache.              |
+|         000 |         0110 |         Flush D cache.              |
+|         000 |         1011 |         Clean all caches.           |
+|         000 |         1010 |         Clean D cache.              |
 |         000 |         1111 |         Clean and flush all caches. |
 |         000 |         1110 |         Clean and flush D cache.    |
          
