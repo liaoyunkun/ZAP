@@ -4,7 +4,7 @@
 
 ### Description 
 
-The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (v4 compliant, See "Deviations from Specification" section).
+The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (v4 compliant, no FCSE and fine pages).
 
 #### Specifications 
 
@@ -14,7 +14,7 @@ The ZAP processor is a 10 stage pipelined processor for FPGA with support for ca
 |-----------------------|-------------------------|
 |HDL                    | Verilog-2001            |
 |Author                 | Revanth Kamaraj         |
-|ARM v4T ISA Support    | Fully compatible (See "Deviations from Specification" section) |
+|ARM v4T ISA Support    | Fully compatible        |
 |ARM v5T ISA Support    | Limited. Only BLX, CLZ supported |
 |Branch Predictor       | Direct mapped bimodal   |
 |Write Buffer           | Yes                     |
@@ -43,9 +43,9 @@ ZAP is a pipelined soft processor for FPGA that contains:
 |Cache Write Policy     | Writeback               |
 |L1 Code TLB            | Direct mapped           |
 |L1 Data TLB            | Direct mapped           |
-|Bus Interface          | 32-bit Wishbone B3 (Linear incrementing burst)     |
+|Bus Interface          | 32-bit Wishbone B3 Linear incrementing burst |
 |Cache/TLB Lock Support | No                      |
-|CP15 Compliance        | v4 (See "Deviations from Specification" section)    |
+|CP15 Compliance        | v4                      |
 
 ##### Test SOC (chip_top.v)
 
@@ -254,6 +254,7 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |         000 |         1010 |         Clean D cache.              |
 |         000 |         1111 |         Clean and flush all caches. |
 |         000 |         1110 |         Clean and flush D cache.    |
+|	 Other|	        Other|	       Clean and flush all caches. | 
          
 #### Register 8 : TLB Functions
 
@@ -262,26 +263,5 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |    000 |        0111 |        Flush all TLBs   |
 |    000 |        0101 |        Flush I TLB      |
 |    000 |        0110 |        Flush D TLB      |
-
-## Small Page Translation (4KB)
-![Small Page Translation](https://documentation-service.arm.com/static/5e8e1cc988295d1e18d362c7?token=)
-
-## Large Page Translation (64KB)
-![Large Page Translation](https://documentation-service.arm.com/static/5e8e124c88295d1e18d34cbe?token=)
-
-## Section Translation (1MB)
-![Section Translation](https://documentation-service.arm.com/static/5e8e1cc988295d1e18d362b8?token=)
-
-## Devations from specification/Unimplemented Features
-* CP15 Reg0 is RESERVED and reads all 0x0. Compliant behavior is for 15:12 to read non-zero value.
-* Bit 6 of CP15 Reg1 will read as 0x0. Compliant behavior is to read as 0x1.
-* Fine page tables not supported.
-* No support for FCSE.
-
-## Implementation Specific Details.
-* For CP15 register 7 and 8, specifying opcode_2 to a value other than 0 will result in UNDEFINED operation.
-
-
-
-                                                                    
+|   Other|        Other|        Flush all TLBs   |
 

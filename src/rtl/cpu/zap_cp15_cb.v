@@ -230,13 +230,13 @@ begin
                 // Default values - rest of them are still zero due to
                 // previous assignment.
                 // r[1][3]   - Write buffer always enabled.
-                // r[1][7:4] - 0 = LEndian(7), 0 = 0, 1 = 32-bit address range
-                //             1 = 32-bit handlers enabled(4). 
+                // r[1][7:4] - 0 = LEndian(7), (6) = 1, 1 = 32-bit address range
+                //             1 = 32-bit handlers enabled(4).  
                 //
                 r[0][23:16]     <= 32'h1;
                 r[1][1]         <= 1'd1;
                 r[1][3]         <= 1'd1;    
-                r[1][7:4]       <= 4'b0011; 
+                r[1][7:4]       <= 4'b0111; 
                 r[1][11]        <= 1'd1;                
                 r[1][13]        <= 1'd0;
         end
@@ -330,8 +330,8 @@ begin
 
                                         default:
                                         begin
-                                                $display($time, " - %m :: Error: Bad TLB command.");
-                                                $finish;
+                                                o_itlb_inv <= 1'd1;
+                                                o_dtlb_inv <= 1'd1;
                                         end
 
                                 endcase
@@ -385,8 +385,8 @@ begin
 
                                         default:
                                         begin
-                                                $display($time, " - %m :: Error: Bad coprocessor instruction %b", i_cp_word);
-                                                $finish;
+                                                o_dcache_clean <= 1'd1;
+                                                state          <= CLFLUSH_ID_CACHE;
                                         end
 
                                 endcase
