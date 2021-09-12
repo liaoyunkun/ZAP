@@ -93,7 +93,7 @@ cd $PROJ_ROOT/obj/ts/$test_name # Switch to object folder.
 gvim zap.log.gz    # View the log file
 gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more information.
 ```
-To use this processor in your SOC, instantiate this top level CPU module in your project: [CPU top file](/src/rtl/cpu/zap_top.v)
+To use this processor in your SOC, instantiate this top level CPU module in your project: /src/rtl/cpu/zap_top.v
 
 ### Implementation Specific Details
 
