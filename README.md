@@ -1,10 +1,12 @@
-## The ZAP Soft Processor (ARMv5T Compatible)
+## The ZAP ARM Processor (ARMv5T Compatible, FPGA Synthesizable Soft Processor)
 
 #### Author        : Revanth Kamaraj (revanth91kamaraj@gmail.com)
 
 ### Introduction 
 
 The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (ARMv5T compliant). 
+
+![Wishbone logo](https://wishbone-interconnect.readthedocs.io/en/latest/_images/wishbone_stamp.svg) 
 
 #### Features 
 
