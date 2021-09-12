@@ -110,7 +110,6 @@ To use this processor in your SOC, instantiate this top level CPU module in your
 |Bits | Name    | Description                              |
 |-----|---------|------------------------------------------|
 |31:0 | Various | Processor ID info.                       |
-|     |         |                                          |
 
 ##### Register 1 : Control
 
