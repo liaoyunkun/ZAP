@@ -8,7 +8,7 @@ The ZAP processor is a 10 stage pipelined processor for FPGA with support for ca
 
 #### Features 
 
-##### ZAP Core (zap_core.v)
+##### ZAP Processor (zap_top.v)
 
 The ZAP core is a pipelined ATMv5T processor for FPGA.
 
@@ -24,21 +24,6 @@ The ZAP core is a pipelined ATMv5T processor for FPGA.
 |External Coproc. Bus   | No                      |
 |Cache Interface        | 128-Bit custom interface|
 |26-Bit Support         | No                      |
-
- * 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
- * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
-
-##### ZAP Processor (zap_top.v)
-
-The ZAP processor consists of:
-* A 10-stage pipelined ARMv5T software compliant core (ZAP core)
-* A (CP15 software compliant) cache controller with integrated cache RAMs (inference, block RAMs)
-* A (CP15 software compliant) VM controller with integrated cache RAMs (inference, block RAMs)
-
-| Property              | Description             |
-|-----------------------|-------------------------|
-|HDL                    | Verilog-2001            |
-|Author                 | Revanth Kamaraj         |
 |L1 Code Cache          | Direct mapped virtual   |
 |L1 Data Cache          | Direct mapped virtual   |
 |Cache Write Policy     | Writeback               |
@@ -49,109 +34,52 @@ The ZAP processor consists of:
 |CP15 Compliance        | v5T (No fine pages)     |
 |FCSE Support           | Yes                     |
 
-##### Test/Sample SOC (chip_top.v)
-
-The SOC integrates:
-* The ZAP processor
-* 2 x Timers
-* 1 x VIC
-* 2 x UARTs (UART is the only external IP used in this project, and is taken from OpenCores)
-
-Provides an external 32-bit Wishbone bus to connect FPGA SRAM. Note that CTI and BTE are not exposed in the SOC SRAM interface.
- 
-```Verilog
-// Peripheral addresses.
-localparam UART0_LO                     = 32'hFFFFFFE0;
-localparam UART0_HI                     = 32'hFFFFFFFF;
-localparam TIMER0_LO                    = 32'hFFFFFFC0;
-localparam TIMER0_HI                    = 32'hFFFFFFDF;
-localparam VIC_LO                       = 32'hFFFFFFA0;
-localparam VIC_HI                       = 32'hFFFFFFBF;
-localparam UART1_LO                     = 32'hFFFFFF80;
-localparam UART1_HI                     = 32'hFFFFFF9F;
-localparam TIMER1_LO                    = 32'hFFFFFF60;
-localparam TIMER1_HI                    = 32'hFFFFFF7F;
-```
-
-### System Integration
-
-The project offers three flavors based on your need:
-* zap_core.v is the bare processor core without cache and MMU, with a custom 128-bit cache interface.
-* zap_top.v is the processor top level (What you probably need i.e., integrates the core, cache and MMU).
-* chip_top.v is the SOC top level that integrates the ZAP processor, 2 x timers, 2 x UARTs and a VIC. The SOC fabric is Wishbone and is extendable.
+ * 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
+ * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
 
 #### CPU Configuration (zap_top.v)
 
-```Verilog
-// BP entries, FIFO depths
-
-parameter        BP_ENTRIES              = 1024, // Predictor RAM depth. Must be 2^n and > 2.
-parameter        FIFO_DEPTH              = 4,    // Command FIFO depth. Must be 2^n and > 2.
-parameter        STORE_BUFFER_DEPTH      = 16,   // Depth of the store buffer. Must be 2^n and > 2.
-
-// Data MMU/Cache configuration.
-
-parameter [31:0] DATA_SECTION_TLB_ENTRIES =  4,    // Section TLB entries. Must be 2^n (n > 0).
-parameter [31:0] DATA_LPAGE_TLB_ENTRIES   =  8,    // Large page TLB entries. Must be 2^n (n > 0).
-parameter [31:0] DATA_SPAGE_TLB_ENTRIES   =  16,   // Small page TLB entries. Must be 2^n (n > 0).
-parameter [31:0] DATA_CACHE_SIZE          =  1024, // Cache size in bytes. Must be at least 256B and 2^n.
-
-// Code MMU/Cache configuration.
-
-parameter [31:0] CODE_SECTION_TLB_ENTRIES =  4,    // Section TLB entries. Must be 2^n (n > 0).
-parameter [31:0] CODE_LPAGE_TLB_ENTRIES   =  8,    // Large page TLB entries. Must be 2^n (n > 0).
-parameter [31:0] CODE_SPAGE_TLB_ENTRIES   =  16,   // Small page TLB entries. Must be 2^n (n > 0).
-parameter [31:0] CODE_CACHE_SIZE          =  1024  // Cache size in bytes. Must be at least 256B and 2^n.
-```
+| Parameter                | Default| Description |
+|--------------------------|--------|-------------|
+| BP_ENTRIES               |  1024 | Branch Predictor Settings. Predictor RAM depth. Must be 2^n and > 2 |
+| FIFO_DEPTH               |  4    | Branch Predictor Settings. Command FIFO depth. Must be 2^n and > 2  |
+| STORE_BUFFER_DEPTH       | 16    | Branch Predictor Settings. Depth of the store buffer. Must be 2^n and > 2 |
+| DATA_SECTION_TLB_ENTRIES |  4    | Data Cache/MMU Configuration. Section TLB entries. Must be 2^n (n > 0) |
+| DATA_LPAGE_TLB_ENTRIES   |  8    | Data Cache/MMU Configuration. Large page TLB entries. Must be 2^n (n > 0) |
+| DATA_SPAGE_TLB_ENTRIES   |  16   | Data Cache/MMU Configuration. Small page TLB entries. Must be 2^n (n > 0) |
+| DATA_CACHE_SIZE          |  1024 | Data Cache/MMU Configuration. Cache size in bytes. Must be at least 256B and 2^n |
+| CODE_SECTION_TLB_ENTRIES |  4    | Instruction Cache/MMU Configuration. Section TLB entries. Must be 2^n (n > 0) |
+| CODE_LPAGE_TLB_ENTRIES   |  8    | Instruction Cache/MMU Configuration. Large page TLB entries. Must be 2^n (n > 0) |
+| CODE_SPAGE_TLB_ENTRIES   |  16   | Instruction Cache/MMU Configuration. Small page TLB entries. Must be 2^n (n > 0) |
+| CODE_CACHE_SIZE          |  1024 | Instruction Cache/MMU Configuration. Cache size in bytes. Must be at least 256B and 2^n |
 
 #### CPU IO Interface (zap_top.v)
  
 Wishbone B3 compatible 32-bit bus.
 
-```Verilog
-        // --------------------------------------
-        // Clock and reset
-        // --------------------------------------
-
-        input   wire            i_clk,
-        input   wire            i_reset,
-
-        // ---------------------------------------
-        // Interrupts. 
-        // Both of them are active high and level 
-        // trigerred.
-        // ---------------------------------------
-
-        input   wire            i_irq,
-        input   wire            i_fiq,
-
-        // ---------------------
-        // Wishbone interface.
-        // ---------------------
-
-        output  wire            o_wb_cyc,
-        output  wire            o_wb_stb,
-        output  wire [31:0]     o_wb_adr,
-        output  wire            o_wb_we,
-        output wire  [31:0]     o_wb_dat,
-        output  wire [3:0]      o_wb_sel,
-        output wire [2:0]       o_wb_cti,  // Cycle Type Indicator (Supported modes: Incrementing Burst, End of Burst).
-        output wire [1:0]       o_wb_bte,  // Burst Type Indicator (Supported modes: Linear)
-        input   wire            i_wb_ack,
-        input   wire [31:0]     i_wb_dat,
-        
-        // ------------------------
-        // IGNORE
-        // ------------------------
-        
-        // Please ignore these.
-        output  wire            o_wb_stb_nxt,
-        output  wire            o_wb_cyc_nxt,
-        output wire  [31:0]     o_wb_adr_nxt
-```
+|        Dir    | Size     | Port               | Description                      | 
+|---------------|----------|--------------------|----------------------------------|
+|        input  |          | i_clk              |  Clock                           |     
+|        input  |          | i_reset            |  Reset                           |
+|        input  |          | i_irq              |  Interrupt. Level Sensitive.     |
+|        input  |          | i_fiq              |  Fast Interrupt. Level Sensitive.|
+|        output |          |  o_wb_cyc          |  Wishbone B3 Signal              |
+|        output |          |  o_wb_stb          |  WIshbone B3 signal              |
+|        output | [31:0]   |  o_wb_adr          |  Wishbone B3 signal.             |
+|        output |          |  o_wb_we           |  Wishbone B3 signal.             |
+|        output | [31:0]   |  o_wb_dat          |  Wishbone B3 signal.             |
+|        output | [3:0]    |  o_wb_sel          |  Wishbone B3 signal.             |
+|        output | [2:0]    |  o_wb_cti          |  Wishbone B3 signal. Cycle Type Indicator (Supported modes: Incrementing Burst, End of Burst)|
+|        output | [1:0]    |  o_wb_bte          |  Wishbone B3 signal. Burst Type Indicator (Supported modes: Linear)                          |
+|        input  |          |  i_wb_ack          |  Wishbone B3 signal.             |
+|        input  | [31:0]   |  i_wb_dat          |  Wishbone B3 signal.             |
+|        output |          |   o_wb_stb_nxt     | IGNORE THIS PORT. LEAVE OPEN.    |  
+|        output |          |   o_wb_cyc_nxt     | IGNORE THIS PORT. LEAVE OPEN.    |
+|        output |   [31:0] |   o_wb_adr_nxt     | IGNORE THIS PORT. LEAVE OPEN.    |
 
 
-### Getting Started (Tested on Ubuntu 16.04 LTS/18.04 LTS)
+### Getting Started 
+*Tested on Ubuntu 16.04 LTS/18.04 LTS*
 
 #### Run Sample Tests
 
@@ -161,37 +89,30 @@ Let the variable $test_name hold the name of the test. See the src/ts directory 
 sudo apt-get install sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd iverilog gtkwave make perl xterm
 cd $PROJ_ROOT/src/ts/$test_name # $PROJ_ROOT is the project directory.
 make # Runs the test using IVerilog.
-cd $PROJ_ROOT/obj/ts/$test_name
+cd $PROJ_ROOT/obj/ts/$test_name # Switch to object folder.
 gvim zap.log.gz    # View the log file
 gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more information.
 ```
 To use this processor in your SOC, instantiate this top level CPU module in your project: [CPU top file](/src/rtl/cpu/zap_top.v)
 
-#### Running FPGA Synthesis of sample SOC (Requires Vivado toolchain to be installed, Tested on Ubuntu 16.04 LTS/18.04 LTS)
+### Implementation Specific Details
 
-This will synthesize the sample SOC, and not just the processor core.
-
-Download and install Vivado WebPACK from https://www.xilinx.com/member/forms/download/xef-vivado.html?filename=Xilinx_Vivado_SDK_Web_2018.3_1207_2324_Lin64.bin 
-```bash
-cd $PROJ_ROOT/src/synth/vivado/  # $PROJ_ROOT is the project directory.
-source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg256-1L.
-```
-
-### Timing Performance
+#### FPGA Timing Performance (Vivado, Retime Enabled)
 
 | FPGA Part          | Speed |  Critical Path |
 |--------------------|-------|----------------|
 | xc7a35tiftg256-1L  | 80MHz | Cache access   |
 
-### CP15 Control Registers
+#### Coprocessor #15 Control Registers
 
-#### Register 0 : ID Register
+##### Register 0 : ID Register
 
-|Bits | Name | Description                              |
-|-----|------|------------------------------------------|
-|31:0 | --   | Processor ID info.                       |
+|Bits | Name    | Description                              |
+|-----|---------|------------------------------------------|
+|31:0 | Various | Processor ID info.                       |
+|     |         |                                          |
 
-#### Register 1 : Control
+##### Register 1 : Control
 
 |Bits | Name      | Description                              |
 |-----|-----------|------------------------------------------|
@@ -199,7 +120,7 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |1    | A         | Always 0. Alignment check off            |
 |2    | D         | Data Cache Enable. Active high           |
 |3    | W         | Always 1. Write Buffer always on.        |
-|4    | P         | Always 1. RESERVED                       | 
+|4    | P         | Always 1. RESERVED                       |
 |5    | D         | Always 1. RESERVED                       |
 |6    | L         | Always 1. RESERVED                       |
 |7    | B         | Always 0. Little Endian                  |
@@ -211,20 +132,20 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |14   | RR        | Always 1. Direct mapped cache.           |
 |15   | L4        | Always 0. Normal behavior.               |
 
-#### Register 2 : Translation Base Address
+##### Register 2 : Translation Base Address
 
 |Bits | Name      | Description                              |
 |-----|-----------|------------------------------------------|
 |13:0 | M         | Preserve value.                          |
 |31:14| TTB       | Upper 18-bits of translation address     |
 
-#### Register 3 : Domain Access Control (X=0 to X=15)
+##### Register 3 : Domain Access Control (X=0 to X=15)
 
 |Bits     | Name      | Description                              |
 |---------|-----------|------------------------------------------|
 |2X+1:2X  | DX        | DX access permission.                    |
 
-#### Register 5 : Fault Status Register
+##### Register 5 : Fault Status Register
 
 |Bits | Name      | Description                              |
 |-----|-----------|------------------------------------------|
@@ -232,42 +153,43 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |1:0  | Domain    | Domain.                                  |
 |11:8 | SBZ       | Always 0. RESERVED                       |
 
-#### Register 6 : Fault Address Register
+##### Register 6 : Fault Address Register
 
 |Bits | Name      | Description                              |
 |-----|-----------|------------------------------------------|
 |31:0 | Addr      | Fault Address.                           |
 
-#### Register 7 : Cache Functions
+##### Register 7 : Cache Functions
 
-| Opcode2     |  CRm         | Description                         |
-|-------------|--------------|-------------------------------------|
-|         000 |         0111 |         Flush all caches.           |
-|         000 |         0101 |         Flush I cache.              |
-|         000 |         0110 |         Flush D cache.              |
-|         000 |         1011 |         Clean all caches.           |
-|         000 |         1010 |         Clean D cache.              |
-|         000 |         1111 |         Clean and flush all caches. |
-|         000 |         1110 |         Clean and flush D cache.    |
-|	 Other|	        Other|	       Clean and flush all caches. | 
-         
-#### Register 8 : TLB Functions
+| Opcode2     |  CRm            | Description                         |
+|-------------|-----------------|-------------------------------------|
+|         000 |         0111    |         Flush all caches.           |
+|         000 |         0101    |         Flush I cache.              |
+|         000 |         0110    |         Flush D cache.              |
+|         000 |         1011    |         Clean all caches.           |
+|         000 |         1010    |         Clean D cache.              |
+|         000 |         1111    |         Clean and flush all caches. |
+|         000 |         1110    |         Clean and flush D cache.    |
+|       Other |        Other    |         Clean and flush ALL caches  |
 
-|Opcode2 |        CRm  |        Description      |
-|--------|-------------|-------------------------|        
-|    000 |        0111 |        Flush all TLBs   |
-|    000 |        0101 |        Flush I TLB      |
-|    000 |        0110 |        Flush D TLB      |
-|   Other|        Other|        Flush all TLBs   |
 
-#### Register 13 : FCSE Extentions
+##### Register 8 : TLB Functions
+
+|Opcode2 |        CRm    |        Description      |
+|--------|---------------|-------------------------|
+|    000 |        0111   |        Flush all TLBs   |
+|    000 |        0101   |        Flush I TLB      |
+|    000 |        0110   |        Flush D TLB      |
+|   Other|        Other  |        Flush all TLBs   |
+
+##### Register 13 : FCSE Extentions
 
 | Field | Description |
 |-------|-------------|
 | 31:25 | PID         |
 
-### Implementation Specific Details
-* Memory system does not support lockdown.
+##### Lockdown Support
+* CPU memory system does not support lockdown.
 
-### Unimplemented Features
-* No support for 1KB tiny pages.
+##### Tiny Pages
+* No support for tiny pages (1KB).

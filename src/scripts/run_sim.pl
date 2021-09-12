@@ -93,10 +93,15 @@ my $UART0_PATH_RX               = "$SCRATCH/zapuart0.rx";
 my $UART1_PATH_RX               = "$SCRATCH/zapuart1.rx";
 
 # Generate IVL options including VCD generation path.
-my $IVL_OPTIONS  = " -I$ZAP_HOME/src/rtl/cpu -I$ZAP_HOME/obj/ts/$TEST -I$ZAP_HOME/src/rtl/External_IP/uart16550/rtl            ";
-   $IVL_OPTIONS .= "  $ZAP_HOME/src/rtl/External_IP/uart16550/rtl/*.v $ZAP_HOME/src/rtl/timer/timer.v  $ZAP_HOME/src/rtl/vic/vic.v ";
+my $IVL_OPTIONS  = "";
+
+   # Compile CPU
+   $IVL_OPTIONS .= " -I$ZAP_HOME/src/rtl/cpu -I$ZAP_HOME/obj/ts/$TEST ";
    $IVL_OPTIONS .= "  $ZAP_HOME/src/rtl/cpu/*.v   ";
-   $IVL_OPTIONS .= "  $ZAP_HOME/src/rtl/TOP/chip_top.v ";
+
+   # Compile other TB components
+   $IVL_OPTIONS .= " -I$ZAP_HOME/src/testbench/External_IP/uart16550/rtl            ";
+   $IVL_OPTIONS .= "  $ZAP_HOME/src/testbench/External_IP/uart16550/rtl/*.v ";
    $IVL_OPTIONS .= "  $ZAP_HOME/src/testbench/*.v "; 
    $IVL_OPTIONS .= " -o $VVP_PATH -gstrict-ca-eval -Wall -g2001 -Winfloop -DSEED=$SEED -DMEMORY_IMAGE=\\\"$PROG_PATH\\\" ";
    $IVL_OPTIONS .= " -DVCD_FILE_PATH=\\\"$VCD_PATH\\\" "; 
