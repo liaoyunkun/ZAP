@@ -1,25 +1,26 @@
-## The ZAP Soft Processor (ARMv4T Compatible)
+## The ZAP Soft Processor (ARMv5T Compatible)
 
 #### Author        : Revanth Kamaraj (revanth91kamaraj@gmail.com)
 
-### Description 
+### Introduction 
 
-The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (v4 compliant, no FCSE and fine pages).
+The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (ARMv5T compliant). 
 
-#### Specifications 
+#### Features 
 
 ##### ZAP Core (zap_core.v)
+
+The ZAP core is a pipelined ATMv5T processor for FPGA.
 
 | Property              | Description             |
 |-----------------------|-------------------------|
 |HDL                    | Verilog-2001            |
 |Author                 | Revanth Kamaraj         |
-|ARM v4T ISA Support    | Fully compatible        |
-|ARM v5T ISA Support    | Limited. Only BLX, CLZ supported |
+|ARM v5T ISA Support    | Fully compatible        |
 |Branch Predictor       | Direct mapped bimodal   |
 |Write Buffer           | Yes                     |
 |Abort Model            | Base Restored           |
-|Integrated v4T CP15    | Yes                     |
+|Integrated v5T CP15    | Yes                     |
 |External Coproc. Bus   | No                      |
 |Cache Interface        | 128-Bit custom interface|
 |26-Bit Support         | No                      |
@@ -29,8 +30,8 @@ The ZAP processor is a 10 stage pipelined processor for FPGA with support for ca
 
 ##### ZAP Processor (zap_top.v)
 
-ZAP is a pipelined soft processor for FPGA that contains:
-* A 10-stage pipelined ARMv4T software compliant core (ZAP core)
+The ZAP processor consists of:
+* A 10-stage pipelined ARMv5T software compliant core (ZAP core)
 * A (CP15 software compliant) cache controller with integrated cache RAMs (inference, block RAMs)
 * A (CP15 software compliant) VM controller with integrated cache RAMs (inference, block RAMs)
 
@@ -45,9 +46,10 @@ ZAP is a pipelined soft processor for FPGA that contains:
 |L1 Data TLB            | Direct mapped           |
 |Bus Interface          | 32-bit Wishbone B3 Linear incrementing burst |
 |Cache/TLB Lock Support | No                      |
-|CP15 Compliance        | v4                      |
+|CP15 Compliance        | v5T (No fine pages)     |
+|FCSE Support           | Yes                     |
 
-##### Test SOC (chip_top.v)
+##### Test/Sample SOC (chip_top.v)
 
 The SOC integrates:
 * The ZAP processor
@@ -78,14 +80,7 @@ The project offers three flavors based on your need:
 * zap_top.v is the processor top level (What you probably need i.e., integrates the core, cache and MMU).
 * chip_top.v is the SOC top level that integrates the ZAP processor, 2 x timers, 2 x UARTs and a VIC. The SOC fabric is Wishbone and is extendable.
 
-### Instruction Sets Supported
-
-* 16/32-bit ARM v4T ISA support 
-* Integrated CP15 coprocessor (v4 compliant Cache Controller and MMU)
-* Limited v5T support. 
-  * From the v5T ISA, only supports CLZ and BLX instructions.
-
-### CPU Configuration (zap_top.v)
+#### CPU Configuration (zap_top.v)
 
 ```Verilog
 // BP entries, FIFO depths
@@ -109,7 +104,7 @@ parameter [31:0] CODE_SPAGE_TLB_ENTRIES   =  16,   // Small page TLB entries. Mu
 parameter [31:0] CODE_CACHE_SIZE          =  1024  // Cache size in bytes. Must be at least 256B and 2^n.
 ```
 
-### CPU IO Interface (zap_top.v)
+#### CPU IO Interface (zap_top.v)
  
 Wishbone B3 compatible 32-bit bus.
 
@@ -158,10 +153,12 @@ Wishbone B3 compatible 32-bit bus.
 
 ### Getting Started (Tested on Ubuntu 16.04 LTS/18.04 LTS)
 
+#### Run Sample Tests
+
 Let the variable $test_name hold the name of the test. See the src/ts directory for some basic tests pre-installed. Available test names are: factorial, arm_test, thumb_test, uart. New tests can be added using these as starting templates. Please note that these will be run on the SOC platform (chip_top) that consist of the ZAP processor, 2 x UARTs, a VIC and a timer.
 
 ```bash
-sudo apt-get install sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd iverilog gtkwave
+sudo apt-get install sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd iverilog gtkwave make perl xterm
 cd $PROJ_ROOT/src/ts/$test_name # $PROJ_ROOT is the project directory.
 make # Runs the test using IVerilog.
 cd $PROJ_ROOT/obj/ts/$test_name
@@ -170,9 +167,9 @@ gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more
 ```
 To use this processor in your SOC, instantiate this top level CPU module in your project: [CPU top file](/src/rtl/cpu/zap_top.v)
 
-### Running FPGA Synthesis (Requires Vivado toolchain to be installed, Tested on Ubuntu 16.04 LTS/18.04 LTS)
+#### Running FPGA Synthesis of sample SOC (Requires Vivado toolchain to be installed, Tested on Ubuntu 16.04 LTS/18.04 LTS)
 
-This will synthesize the SOC, and not just the processor core.
+This will synthesize the sample SOC, and not just the processor core.
 
 Download and install Vivado WebPACK from https://www.xilinx.com/member/forms/download/xef-vivado.html?filename=Xilinx_Vivado_SDK_Web_2018.3_1207_2324_Lin64.bin 
 ```bash
@@ -186,15 +183,13 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |--------------------|-------|----------------|
 | xc7a35tiftg256-1L  | 80MHz | Cache access   |
 
-### CP15 Control Registers (v4 Cache + MMU Control)
+### CP15 Control Registers
 
 #### Register 0 : ID Register
 
 |Bits | Name | Description                              |
 |-----|------|------------------------------------------|
-|31:24| --   | RESERVED                                 |
-|23:16| ID   | Reads 0x0 signifying a v4 implementation |
-|15:0 | --   | RESERVED                                 |
+|31:0 | --   | Processor ID info.                       |
 
 #### Register 1 : Control
 
@@ -203,10 +198,10 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |0    | M         | MMU Enable. Active high                  |
 |1    | A         | Always 0. Alignment check off            |
 |2    | D         | Data Cache Enable. Active high           |
-|3    | W         | Always 1. Write Buffer always ON         |
+|3    | W         | Always 1. Write Buffer always on.        |
 |4    | P         | Always 1. RESERVED                       | 
 |5    | D         | Always 1. RESERVED                       |
-|6    | --        | RESERVED                                 |
+|6    | L         | Always 1. RESERVED                       |
 |7    | B         | Always 0. Little Endian                  |
 |8    | S         | The S bit                                |
 |9    | R         | The R bit                                |
@@ -265,3 +260,14 @@ source run_synth.sh              # Targets 80MHz on Xiling FPGA part xc7a35tiftg
 |    000 |        0110 |        Flush D TLB      |
 |   Other|        Other|        Flush all TLBs   |
 
+#### Register 13 : FCSE Extentions
+
+| Field | Description |
+|-------|-------------|
+| 31:25 | PID         |
+
+### Implementation Specific Details
+* Memory system does not support lockdown.
+
+### Unimplemented Features
+* No support for 1KB tiny pages.

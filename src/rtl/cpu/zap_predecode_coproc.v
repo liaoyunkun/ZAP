@@ -136,7 +136,7 @@ begin
         IDLE:
                 // Activate only if no thumb, not in USER mode and CP15 access is requested.
                 casez ( (!i_cpsr_ff_t && (i_instruction[34:32] == 3'd0) && i_valid) ? i_instruction[31:0] : 35'd0 )
-                MRC, MCR, LDC, STC, CDP:
+                MRC, MCR, LDC, STC, CDP, MRC2, MCR2, LDC2, STC2:
                 begin
                         if ( i_instruction[11:8] == 4'b1111 && i_cpsr_ff_mode != USR )  // CP15 and root access -- perfectly fine.
                         begin

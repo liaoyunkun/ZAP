@@ -124,6 +124,7 @@ wire [31:0]     dc_far;
 wire            cpu_dc_en, cpu_ic_en;
 
 wire [1:0]      cpu_sr;
+wire [7:0]      cpu_pid;
 wire [31:0]     cpu_baddr, cpu_dac_reg;
 
 wire            cpu_dc_inv, cpu_ic_inv;
@@ -205,6 +206,7 @@ zap_core #(
 .o_baddr                (cpu_baddr),
 .o_mmu_en               (cpu_mmu_en),
 .o_sr                   (cpu_sr),
+.o_pid                  (cpu_pid),
 .o_dcache_inv           (cpu_dc_inv),
 .o_icache_inv           (cpu_ic_inv),
 .o_dcache_clean         (cpu_dc_clean),
@@ -242,8 +244,8 @@ zap_cache #(
 u_data_cache (
 .i_clk                  (i_clk),
 .i_reset                (reset),
-.i_address              (cpu_daddr),
-.i_address_nxt          (cpu_daddr_nxt),
+.i_address              (cpu_daddr + (cpu_pid << 25)),
+.i_address_nxt          (cpu_daddr_nxt + (cpu_pid << 25)),
 
 .i_rd                   (!cpu_dc_we && cpu_dc_stb),
 .i_wr                   (cpu_dc_we),
@@ -295,8 +297,8 @@ zap_cache #(
 u_code_cache (
 .i_clk              (i_clk),
 .i_reset            (reset),
-.i_address          (cpu_iaddr     & 32'hFFFF_FFFC), // Cut off lower 2 bits.
-.i_address_nxt      (cpu_iaddr_nxt & 32'hFFFF_FFFC), // Cut off lower 2 bits.
+.i_address          ((cpu_iaddr     & 32'hFFFF_FFFC) + (cpu_pid << 25)), // Cut off lower 2 bits.
+.i_address_nxt      ((cpu_iaddr_nxt & 32'hFFFF_FFFC) + (cpu_pid << 25)), // Cut off lower 2 bits.
 
 .i_rd              (cpu_instr_stb),
 .i_wr              (1'd0),

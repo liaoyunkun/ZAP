@@ -97,6 +97,9 @@ module zap_cp15_cb #(
         // SR register.
         output reg      [1:0]                   o_sr,
 
+        // FCSE register.
+        output reg      [7:0]                   o_pid,
+
         // -----------------------------------------------------------------
         // Invalidate and clean controls.
         // -----------------------------------------------------------------
@@ -134,7 +137,7 @@ module zap_cp15_cb #(
 // Variables
 // ---------------------------------------------
 
-reg [31:0] r [6:0]; // Coprocessor registers. R7 is write-only.
+reg [31:0] r [13:0];// Coprocessor registers. R7, R8 is write-only.
 reg [3:0]    state; // State variable.
 
 // ---------------------------------------------
@@ -161,6 +164,7 @@ localparam FSR_REG              = 5;
 localparam FAR_REG              = 6;
 localparam CACHE_REG            = 7;
 localparam TLB_REG              = 8;
+localparam FCSE_REG             = 13;
 
 //{opcode_2, crm} values that are valid for this implementation.
 localparam CASE_FLUSH_ID_CACHE       = 7'b000_0111;
@@ -189,6 +193,7 @@ begin
                 o_dac       <= 32'dx;
                 o_baddr     <= 32'dx;
                 o_sr        <= 2'dx;
+                o_pid       <= 8'd0;
         end
         else
         begin
@@ -198,6 +203,7 @@ begin
                 o_dac       <= r[3];                     // DAC register.
                 o_baddr     <= r[2];                     // Base address.               
                 o_sr        <= {r[1][8],r[1][9]};        // SR register. 
+                o_pid       <= {1'd0, r[13][31:25]};     // PID register.
         end
 end
 
@@ -225,20 +231,16 @@ begin
                 r[4]           <= 32'd0;
                 r[5]           <= 32'd0;
                 r[6]           <= 32'd0;
+                r[13]          <= 32'd0; //FCSE
 
-                //
-                // Default values - rest of them are still zero due to
-                // previous assignment.
-                // r[1][3]   - Write buffer always enabled.
-                // r[1][7:4] - 0 = LEndian(7), (6) = 1, 1 = 32-bit address range
-                //             1 = 32-bit handlers enabled(4).  
-                //
-                r[0][23:16]     <= 32'h1;
+                // R0 override.
+                generate_r0;
+
+                // R1 override.
                 r[1][1]         <= 1'd1;
                 r[1][3]         <= 1'd1;    
-                r[1][7:4]       <= 4'b0111; 
+                r[1][6:4]       <= 3'b111; 
                 r[1][11]        <= 1'd1;                
-                r[1][13]        <= 1'd0;
         end
         else
         begin
@@ -456,7 +458,7 @@ begin
                         begin
                                         if ( i_cp_word[20] ) // Load to CPU reg.
                                         begin
-                                                // Register write command.
+                                                // Generate CPU Register write command. CP read.
                                                 o_reg_en        <= 1'd1;
                                                 o_reg_wr_index  <= translate( i_cp_word[15:12], i_cpsr[4:0] ); 
                                                 o_reg_wr_data   <= r[ i_cp_word[19:16] ];
@@ -464,7 +466,7 @@ begin
                                         end
                                         else // Store to CPU register.
                                         begin
-                                                // Generate register read command.
+                                                // Generate CPU register read command. CP write.
                                                 o_reg_en        <= 1'd1;
                                                 o_reg_rd_index  <= translate(i_cp_word[15:12], i_cpsr[4:0]);
                                                 o_reg_wr_index  <= 16;
@@ -475,18 +477,53 @@ begin
                         begin
                                 state        <= DONE;
                         end
+
+                        // Process unconditional words to CP15.
+                        casez ( i_cp_word )
+                        MCR2, MRC2, LDC2, STC2:
+                        begin
+                                if ( i_cp_word[20] ) // Load to CPU reg.
+                                begin
+                                        // Register write command.
+                                        o_reg_en        <= 1'd1;
+                                        o_reg_wr_index  <= translate( i_cp_word[15:12], i_cpsr[4:0] ); 
+                                        o_reg_wr_data   <= r[ i_cp_word[19:16] ];
+                                        state           <= DONE;
+                                end
+                                else // Store to CPU register.
+                                begin
+                                        // Generate register read command.
+                                        o_reg_en        <= 1'd1;
+                                        o_reg_rd_index  <= translate(i_cp_word[15:12], i_cpsr[4:0]);
+                                        o_reg_wr_index  <= 16;
+                                        state           <= READ_DLY;                                        
+                                end
+                        end
+                        endcase 
                 end
                 endcase
 
                 // Default assignments. These bits are unchangeable.
-                r[0][23:16]     <= 32'h1;
+                generate_r0;
+
                 r[1][1]         <= 1'd1;
                 r[1][3]         <= 1'd1;    // Write buffer always enabled.
-                r[1][7:4]       <= 4'b0011; // 0 = Little Endian, 0 = 0, 1 = 32-bit address range, 1 = 32-bit handlers enabled.
+                r[1][6:4]       <= 3'b111;  // 0 = Little Endian, 0 = 0, 1 = 32-bit address range, 
+                                            // 1 = 32-bit handlers enabled.
                 r[1][11]        <= 1'd1;                
-                r[1][13]        <= 1'd0;
         end
 end
+
+// CPU info register.
+task generate_r0;
+begin
+        r[0][3:0]   <= 4'd0;
+        r[0][15:4]  <= 12'hAAA;
+        r[0][19:16] <= 4'h4;
+        r[0][23:20] <= 4'd0;
+        r[0][31:24] <= 8'd0;
+end
+endtask
 
 // assertions_start
         wire [31:0] r0 = r[0];
