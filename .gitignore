@@ -1,6 +1,9 @@
 # Object folder
 obj/
 
+# Ignore SVN.
+.svn/
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
