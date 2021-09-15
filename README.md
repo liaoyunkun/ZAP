@@ -14,6 +14,12 @@ Please use the trunk/ directory as the project root $PROJ_ROOT.
 
 ![Wishbone logo](https://wishbone-interconnect.readthedocs.io/en/latest/_images/wishbone_stamp.svg) 
 
+#### Repos
+
+GIT: https://github.com/krevanth/ZAP
+
+SVN: https://opencores.org/projects/zap
+
 #### Features 
 
 ##### ZAP Processor (zap_top.v)
