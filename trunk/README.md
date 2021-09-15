@@ -4,7 +4,7 @@
 
 ### Introduction 
 
-The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (ARMv5T compliant). 
+The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (ARMv5T compliant). This processor is *not* an ARM clone but a completely different design that is compliant to the ARM v5T instruction set, hence, no particular ARMX number is specified.
 
 ![Wishbone logo](https://wishbone-interconnect.readthedocs.io/en/latest/_images/wishbone_stamp.svg) 
 
