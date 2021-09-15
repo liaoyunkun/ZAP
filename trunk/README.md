@@ -6,7 +6,7 @@
 
 The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (ARMv5T compliant). 
 
-Please note that the processor is *not* an ARM clone but a completely different RTL design (written in FPGA compliant Verilog-2001) that is compliant to the ARM v5T instruction set, hence, no particular ARMX number is specified. 
+Please note that the processor is *not* an ARM clone but a completely different RTL design, written from scratch (in FPGA compliant Verilog-2001), that is compliant to the ARM v5T instruction set, hence, no particular ARMX number is specified. 
 
 This project was created for the ORCONF-2016 Student Design Contest.
 
