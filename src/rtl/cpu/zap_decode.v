@@ -124,55 +124,6 @@ localparam [1:0] SIGNED_BYTE            = 2'd0;
 localparam [1:0] UNSIGNED_HALF_WORD     = 2'd1;
 localparam [1:0] SIGNED_HALF_WORD       = 2'd2;
 
-// assertions_start
-
-        // Debug only.
-        reg bx, dp, br, mrs, msr, ls, mult, halfword_ls, swi, dp1, dp2, dp3, lmult, clz;
-        
-        always @*
-        begin
-                bx      = 0;
-                dp      = 0; 
-                br      = 0; 
-                mrs     = 0; 
-                msr     = 0; 
-                ls      = 0; 
-                mult    = 0; 
-                halfword_ls = 0; 
-                swi = 0; 
-                dp1 = 0;
-                dp2 = 0;
-                dp3 = 0;
-        
-                //
-                // Debugging purposes.
-                //
-                if ( i_instruction_valid )
-                casez ( i_instruction[31:0] )
-                CLZ_INSTRUCTION:                               clz = 1;
-                BX_INST:                                       bx  = 1;
-                MRS:                                           mrs = 1;
-                MSR,MSR_IMMEDIATE:                             msr = 1;
-                DATA_PROCESSING_IMMEDIATE, 
-                DATA_PROCESSING_REGISTER_SPECIFIED_SHIFT, 
-                DATA_PROCESSING_INSTRUCTION_SPECIFIED_SHIFT:   dp  = 1;
-                BRANCH_INSTRUCTION:                            br  = 1;   
-                LS_INSTRUCTION_SPECIFIED_SHIFT,LS_IMMEDIATE:    
-                begin
-                        if ( i_instruction[20] )
-                                ls  = 1; // Load
-                        else
-                                ls  = 2;  // Store
-                end
-                MULT_INST:                        mult            = 1;
-                LMULT_INST:                       lmult           = 1;
-                HALFWORD_LS:                      halfword_ls     = 1; 
-                SOFTWARE_INTERRUPT:               swi             = 1;         
-                endcase
-        end
-
-// assertions_end
-
 // ----------------------------------------------------------------------------
 
 always @*
@@ -298,9 +249,6 @@ begin: tskLDecodeMult
 
         o_shift_length[32]      =       i_instruction[24] ? INDEX_EN:IMMED_EN;
 
-`ifdef DECODE_DEBUG
-        $display($time, "Long multiplication detected!");
-`endif
 
         // We need to generate output code.
         case ( i_instruction[22:21] )
@@ -456,9 +404,6 @@ endtask
 task decode_mult( input [34:0] i_instruction );
 begin: tskDecodeMult
 
-`ifdef DECODE_DEBUG
-        $display($time, "%m: MLT 32x32 -> 32 decode...");
-`endif
 
         o_condition_code        =       i_instruction[31:28];
         o_flag_update           =       i_instruction[20];
@@ -524,9 +469,6 @@ endtask
 task decode_ls( input [34:0] i_instruction );
 begin: tskDecodeLs
 
-`ifdef DECODE_DEBUG
-        $display($time, "%m: LS decode...");
-`endif
 
         o_condition_code = i_instruction[31:28];
 
@@ -690,8 +632,6 @@ endtask
 //
 task process_immediate ( input [34:0] instruction );
 begin
-        dp1 = 1;
-
         o_shift_length          = instruction[11:8] << 1'd1;
         o_shift_length[32]      = IMMED_EN;
         o_shift_source          = instruction[7:0];
@@ -708,8 +648,6 @@ endtask
 //
 task process_instruction_specified_shift ( input [34:0] instruction );
 begin
-         dp2 = 1;
-
         // ROR #0 = RRC, ASR #0 = ASR #32, LSL #0 = LSL #0, LSR #0 = LSR #32 
         // ROR #n = ROR_1 #n ( n > 0 )
         o_shift_length          = instruction[11:7];
@@ -744,12 +682,6 @@ endtask
 // The source register and the amount of shift are both in registers.
 task process_register_specified_shift ( input [34:0] instruction );
 begin
-`ifdef DECODE_DEBUG
-        $display("%m Process register specified shift...");
-`endif
-
-        dp3 = 1;
-
         o_shift_length          = instruction[11:8];
         o_shift_length[32]      = INDEX_EN;
         o_shift_source          = {i_instruction[`DP_RB_EXTEND], instruction[`DP_RB]};

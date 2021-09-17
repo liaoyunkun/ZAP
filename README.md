@@ -10,6 +10,8 @@ Please note that the processor is *not* an ARM clone but a completely different 
 
 This project was created for the ORCONF-2016 Student Design Contest.
 
+ZAP is specifically designed to work with FPGAs.
+
 ![Wishbone logo](https://wishbone-interconnect.readthedocs.io/en/latest/_images/wishbone_stamp.svg) 
 
 #### Repos
@@ -46,8 +48,10 @@ The ZAP core is a pipelined ATMv5T processor for FPGA.
 |CP15 Compliance        | v5T (No fine pages)     |
 |FCSE Support           | Yes                     |
 
- * 10-stage pipeline design. Pipeline has bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
+ * 10-stage pipeline design. Pipeline has extensive bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
  * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
+ * Instructions of ALU + Shift can allow execution of subsequent commands with dependencies if the subsequent command doesn't use the shifter. This is done by having a dual feedback network.
+ * The core is specifically designed for use in FGPA and relies on FGPA inference to allow portability across FPGA vendors.
 
 #### CPU Configuration (zap_top.v)
 
@@ -90,10 +94,9 @@ Wishbone B3 compatible 32-bit bus.
 |        output |   [31:0] |   o_wb_adr_nxt     | IGNORE THIS PORT. LEAVE OPEN.    |
 
 
-### Getting Started 
-*Tested on Ubuntu 16.04 LTS/18.04 LTS*
+### Run Sample Tests
 
-#### Run Sample Tests
+*Tested on Ubuntu 16.04 LTS/18.04 LTS*
 
 Let the variable $test_name hold the name of the test. See the src/ts directory for some basic tests pre-installed. Available test names are: factorial, arm_test, thumb_test, uart. New tests can be added using these as starting templates. Please note that these will be run on the SOC platform (chip_top) that consist of the ZAP processor, 2 x UARTs, a VIC and a timer.
 
@@ -107,103 +110,11 @@ gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more
 ```
 To use this processor in your SOC, instantiate this top level CPU module in your project: /src/rtl/cpu/zap_top.v
 
-### Implementation Specific Details
-
-#### FPGA Timing Performance (Vivado, Retime Enabled)
+### FPGA Timing Performance (Vivado, Retime Enabled)
 
 | FPGA Part          | Speed |  Critical Path |
 |--------------------|-------|----------------|
 | xc7a35tiftg256-1L  | 80MHz | Cache access   |
-
-#### Coprocessor #15 Control Registers
-
-##### Register 0 : ID Register
-
-|Bits | Name    | Description                              |
-|-----|---------|------------------------------------------|
-|31:0 | Various | Processor ID info.                       |
-
-##### Register 1 : Control
-
-|Bits | Name      | Description                              |
-|-----|-----------|------------------------------------------|
-|0    | M         | MMU Enable. Active high                  |
-|1    | A         | Always 0. Alignment check off            |
-|2    | D         | Data Cache Enable. Active high           |
-|3    | W         | Always 1. Write Buffer always on.        |
-|4    | P         | Always 1. RESERVED                       |
-|5    | D         | Always 1. RESERVED                       |
-|6    | L         | Always 1. RESERVED                       |
-|7    | B         | Always 0. Little Endian                  |
-|8    | S         | The S bit                                |
-|9    | R         | The R bit                                |
-|11   | Z         | Always 1. Branch prediction enabled      |
-|12   | I         | Instruction Cache Enable. Active high    |
-|13   | V         | Normal Exception Vectors. Always 0       |
-|14   | RR        | Always 1. Direct mapped cache.           |
-|15   | L4        | Always 0. Normal behavior.               |
-
-##### Register 2 : Translation Base Address
-
-|Bits | Name      | Description                              |
-|-----|-----------|------------------------------------------|
-|13:0 | M         | Preserve value.                          |
-|31:14| TTB       | Upper 18-bits of translation address     |
-
-##### Register 3 : Domain Access Control (X=0 to X=15)
-
-|Bits     | Name      | Description                              |
-|---------|-----------|------------------------------------------|
-|2X+1:2X  | DX        | DX access permission.                    |
-
-##### Register 5 : Fault Status Register
-
-|Bits | Name      | Description                              |
-|-----|-----------|------------------------------------------|
-|3:0  | Status    | Status.                                  |
-|1:0  | Domain    | Domain.                                  |
-|11:8 | SBZ       | Always 0. RESERVED                       |
-
-##### Register 6 : Fault Address Register
-
-|Bits | Name      | Description                              |
-|-----|-----------|------------------------------------------|
-|31:0 | Addr      | Fault Address.                           |
-
-##### Register 7 : Cache Functions
-
-| Opcode2     |  CRm            | Description                         |
-|-------------|-----------------|-------------------------------------|
-|         000 |         0111    |         Flush all caches.           |
-|         000 |         0101    |         Flush I cache.              |
-|         000 |         0110    |         Flush D cache.              |
-|         000 |         1011    |         Clean all caches.           |
-|         000 |         1010    |         Clean D cache.              |
-|         000 |         1111    |         Clean and flush all caches. |
-|         000 |         1110    |         Clean and flush D cache.    |
-|       Other |        Other    |         Clean and flush ALL caches  |
-
-
-##### Register 8 : TLB Functions
-
-|Opcode2 |        CRm    |        Description      |
-|--------|---------------|-------------------------|
-|    000 |        0111   |        Flush all TLBs   |
-|    000 |        0101   |        Flush I TLB      |
-|    000 |        0110   |        Flush D TLB      |
-|   Other|        Other  |        Flush all TLBs   |
-
-##### Register 13 : FCSE Extentions
-
-| Field | Description |
-|-------|-------------|
-| 31:25 | PID         |
-
-##### Lockdown Support
-* CPU memory system does not support lockdown.
-
-##### Tiny Pages
-* No support for tiny pages (1KB).
 
 ### License
 

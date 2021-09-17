@@ -31,6 +31,7 @@
 
 module zap_wb_merger (
 
+// Clock and reset       
 input wire i_clk,   
 input wire i_reset,
 
@@ -156,4 +157,9 @@ begin
 end
 
 endmodule
+
 `default_nettype wire
+
+// ----------------------------------------------------------------------------
+// EOF
+// ----------------------------------------------------------------------------

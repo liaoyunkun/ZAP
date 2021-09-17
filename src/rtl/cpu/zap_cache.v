@@ -321,7 +321,7 @@ begin
         o_wb_wen_nxt = wb_wen[state_nxt];
 end
 
-// assertions_start
+// synopsys translate_off
         reg     xerr = 0;
         
         always @ (posedge i_clk)
@@ -329,12 +329,12 @@ end
                 // Check if data delivered to processor is 'x'.
                 if ( o_dat[0] === 1'dx && o_ack && i_rd )
                 begin
-                        $display($time, "Error : %m Data went to x when giving data to core.");
                         xerr = xerr + 1;
+                        $display($time, "Error : %m Data went to x when giving data to core.");
                         $stop;
                 end
         end
-// assertions_end
+// synopsys translate_on        
 
 endmodule // zap_cache
 
