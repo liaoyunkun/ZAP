@@ -6,15 +6,17 @@
 
 The ZAP processor is a 10 stage pipelined processor for FPGA with support for cache and MMU (ARMv5T compliant). 
 
-Please note that the processor is *not* an ARM clone but a completely different RTL design, written from scratch (in FPGA compliant Verilog-2001), that can run ARM v5T binaries, hence, no particular ARMX number is specified. 
+Please note that the processor is *not* an ARM clone but a completely different RTL design, written from scratch (in FPGA compliant Verilog-2001), that can run ARM v5T binaries (both user and kernel code), hence, no particular ARMX number is specified. 
 
-This project was created for the ORCONF-2016 Student Design Contest.
+This project was originally created for the ORCONF-2016 Student Design Contest.
 
-ZAP is specifically designed to work with FPGAs.
+ZAP is specifically designed to work with FPGAs. To keep the code generic across FPGA vendors, inference based coding style is followed.
 
 ![Wishbone logo](https://wishbone-interconnect.readthedocs.io/en/latest/_images/wishbone_stamp.svg) 
 
 #### Repos
+
+This project is hosted on Github and Opencores.
 
 GIT: https://github.com/krevanth/ZAP
 
@@ -47,6 +49,9 @@ The ZAP core is a pipelined ATMv5T processor for FPGA.
 |Cache/TLB Lock Support | No                      |
 |CP15 Compliance        | v5T (No fine pages)     |
 |FCSE Support           | Yes                     |
+|Cache Read Speed (Hit) | 320MB/s @ 80MHz CLK     |
+|Cache Write Speed(Hit) | 160MB/s @ 80MHz CLK     |
+|Cache Line Size        | 16B                     |
 
  * 10-stage pipeline design. Pipeline has extensive bypass network to resolve dependencies. Most operations execute at a rate of 1 operation per clock.
  * 2 write ports for the register file to allow LDR/STR with writeback to execute as a single instruction.
@@ -85,14 +90,129 @@ Wishbone B3 compatible 32-bit bus.
 |        output |          |  o_wb_we           |  Wishbone B3 signal.             |
 |        output | [31:0]   |  o_wb_dat          |  Wishbone B3 signal.             |
 |        output | [3:0]    |  o_wb_sel          |  Wishbone B3 signal.             |
-|        output | [2:0]    |  o_wb_cti          |  Wishbone B3 signal. Cycle Type Indicator (Supported modes: Incrementing Burst, End of Burst)|
-|        output | [1:0]    |  o_wb_bte          |  Wishbone B3 signal. Burst Type Indicator (Supported modes: Linear)                          |
+|        output | [2:0]    |  o_wb_cti          |  Wishbone B3 signal. Cycle Type Indicator (Supported modes: Incrementing Burst, End of Burst) |
+|        output | [1:0]    |  o_wb_bte          |  Wishbone B3 signal. Burst Type Indicator (Supported modes: Linear)                           |
 |        input  |          |  i_wb_ack          |  Wishbone B3 signal.             |
 |        input  | [31:0]   |  i_wb_dat          |  Wishbone B3 signal.             |
 |        output |          |   o_wb_stb_nxt     | IGNORE THIS PORT. LEAVE OPEN.    |  
 |        output |          |   o_wb_cyc_nxt     | IGNORE THIS PORT. LEAVE OPEN.    |
 |        output |   [31:0] |   o_wb_adr_nxt     | IGNORE THIS PORT. LEAVE OPEN.    |
 
+### Directory Structure
+
+
+
+├── LICENSE
+
+├── makefile
+
+├── README.md
+
+└── src
+
+        ├── rtl
+        │   └── cpu
+        │       ├── zap_alu_main.v
+        │       ├── zap_cache_fsm.v
+        │       ├── zap_cache_tag_ram.v
+        │       ├── zap_cache.v
+        │       ├── zap_core.v
+        │       ├── zap_cp15_cb.v
+        │       ├── zap_decode_main.v
+        │       ├── zap_decode.v
+        │       ├── zap_decompile.v
+        │       ├── zap_defines.vh
+        │       ├── zap_fetch_main.v
+        │       ├── zap_fifo.v
+        │       ├── zap_functions.vh
+        │       ├── zap_issue_main.v
+        │       ├── zap_localparams.vh
+        │       ├── zap_mem_inv_block.v
+        │       ├── zap_memory_main.v
+        │       ├── zap_predecode_compress.v
+        │       ├── zap_predecode_coproc.v
+        │       ├── zap_predecode_main.v
+        │       ├── zap_predecode_mem_fsm.v
+        │       ├── zap_ram_simple.v
+        │       ├── zap_register_file.v
+        │       ├── zap_shifter_main.v
+        │       ├── zap_shifter_multiply.v
+        │       ├── zap_shift_shifter.v
+        │       ├── zap_sync_fifo.v
+        │       ├── zap_thumb_decoder.v
+        │       ├── zap_tlb_check.v
+        │       ├── zap_tlb_fsm.v
+        │       ├── zap_tlb.v
+        │       ├── zap_top.v
+        │       ├── zap_wb_adapter.v
+        │       ├── zap_wb_merger.v
+        │       └── zap_writeback.v
+        ├── scripts
+        │   ├── bin2vlog.pl
+        │   ├── Config.cfg_template
+        │   ├── makefile
+        │   ├── run_sim.pl
+        │   └── uart_input.bash
+        ├── testbench
+        │   ├── chip_top.v
+        │   ├── External_IP
+        │   │   └── uart16550
+        │   │       ├── doc
+        │   │       │   ├── CHANGES.txt
+        │   │       │   ├── src
+        │   │       │   │   └── UART_spec.doc
+        │   │       │   └── UART_spec.pdf
+        │   │       └── rtl
+        │   │           ├── raminfr.v
+        │   │           ├── uart_debug_if.v
+        │   │           ├── uart_defines.v
+        │   │           ├── uart_receiver.v
+        │   │           ├── uart_regs.v
+        │   │           ├── uart_rfifo.v
+        │   │           ├── uart_sync_flops.v
+        │   │           ├── uart_tfifo.v
+        │   │           ├── uart_top.v
+        │   │           ├── uart_transmitter.v
+        │   │           └── uart_wb.v
+        │   ├── ram.v
+        │   ├── timer.v
+        │   ├── uart_rx_logger.v
+        │   ├── uart_tx_dumper.v
+        │   ├── vic.v
+        │   └── zap_tb.v
+        └── ts
+            ├── arm_test
+            │   ├── arm_test.c
+            │   ├── arm_test.ld
+            │   ├── arm_test.s
+            │   ├── Config.cfg
+            │   ├── Description.txt
+            │   └── makefile
+            ├── factorial
+            │   ├── Config.cfg
+            │   ├── Description.txt
+            │   ├── factorial.c
+            │   ├── factorial.ld
+            │   ├── factorial.s
+            │   └── makefile
+            ├── makefile
+            ├── thumb_test
+            │   ├── Config.cfg
+            │   ├── Description.txt
+            │   ├── linker.ld
+            │   ├── main.c
+            │   ├── makefile
+            │   └── thumb.s
+            └── uart
+                ├── Config.cfg
+                ├── Description.txt
+                ├── irq_handler.c
+                ├── main.c
+                ├── makefile
+                ├── uart.c
+                ├── uart.h
+                ├── uart.ld
+                └── uart.s
 
 ### Run Sample Tests
 
@@ -101,12 +221,13 @@ Wishbone B3 compatible 32-bit bus.
 Let the variable $test_name hold the name of the test. See the src/ts directory for some basic tests pre-installed. Available test names are: factorial, arm_test, thumb_test, uart. New tests can be added using these as starting templates. Please note that these will be run on the SOC platform (chip_top) that consist of the ZAP processor, 2 x UARTs, a VIC and a timer.
 
 ```bash
-sudo apt-get install sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd iverilog gtkwave make perl xterm
+sudo apt-get install gcc-arm-none-eabi binutils-arm-none-eabi gdb openocd 
+sudo apt-get install iverilog gtkwave make perl xterm
 cd $PROJ_ROOT/src/ts/$test_name # $PROJ_ROOT is the project directory.
-make # Runs the test using IVerilog.
+make                            # Runs the test using IVerilog.
 cd $PROJ_ROOT/obj/ts/$test_name # Switch to object folder.
-gvim zap.log.gz    # View the log file
-gtkwave zap.vcd.gz # Exists if selected by Config.cfg. See PDF document for more information.
+gvim zap.log.gz                 # View the log file
+gtkwave zap.vcd.gz              # Exists if selected by Config.cfg of that test case.
 ```
 To use this processor in your SOC, instantiate this top level CPU module in your project: /src/rtl/cpu/zap_top.v
 

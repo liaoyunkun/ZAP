@@ -105,9 +105,9 @@ input   wire    [31:0]  i_wb_dat
 
 );
 
-// -------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Includes and Localparams
-// -------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 `include "zap_localparams.vh"
 `include "zap_defines.vh"
@@ -261,12 +261,14 @@ begin
                                 begin
                                         if ( i_rd ) /* Read request. */
                                         begin  
-                                                /* Accelerate performance */
+                                                /* 
+                                                 * Accelerate performance 
+                                                 * Read throughput at 80MHz
+                                                 * clock is 80M operations per 
+                                                 * second (Hit).
+                                                 */
                                                 o_dat   = adapt_cache_data(i_address[3:2], i_cache_line); 
-
-                                                hit = 1'd1;
-
-
+                                                hit     = 1'd1;
                                                 o_ack   = 1'd1;
                                         end
                                         else if ( i_wr ) /* Write request */
@@ -274,7 +276,12 @@ begin
                                                 state_nxt    = REFRESH_1;
                                                 o_ack        = 1'd0;
 
-                                                /* Accelerate performance */
+                                                /* 
+                                                 * Each write to cache takes
+                                                 * 3 cycles. Write throuput at
+                                                 * 80MHz is 26.6M operations per
+                                                 * second (Hit).
+                                                 */
                                                 o_cache_line = 
                                                 {i_din,i_din,i_din,i_din};
   
