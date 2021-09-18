@@ -102,117 +102,114 @@ Wishbone B3 compatible 32-bit bus.
 
 
 
-├── LICENSE
-
-├── makefile
-
-├── README.md
-
-└── src
-
-        ├── rtl
-        │   └── cpu
-        │       ├── zap_alu_main.v
-        │       ├── zap_cache_fsm.v
-        │       ├── zap_cache_tag_ram.v
-        │       ├── zap_cache.v
-        │       ├── zap_core.v
-        │       ├── zap_cp15_cb.v
-        │       ├── zap_decode_main.v
-        │       ├── zap_decode.v
-        │       ├── zap_decompile.v
-        │       ├── zap_defines.vh
-        │       ├── zap_fetch_main.v
-        │       ├── zap_fifo.v
-        │       ├── zap_functions.vh
-        │       ├── zap_issue_main.v
-        │       ├── zap_localparams.vh
-        │       ├── zap_mem_inv_block.v
-        │       ├── zap_memory_main.v
-        │       ├── zap_predecode_compress.v
-        │       ├── zap_predecode_coproc.v
-        │       ├── zap_predecode_main.v
-        │       ├── zap_predecode_mem_fsm.v
-        │       ├── zap_ram_simple.v
-        │       ├── zap_register_file.v
-        │       ├── zap_shifter_main.v
-        │       ├── zap_shifter_multiply.v
-        │       ├── zap_shift_shifter.v
-        │       ├── zap_sync_fifo.v
-        │       ├── zap_thumb_decoder.v
-        │       ├── zap_tlb_check.v
-        │       ├── zap_tlb_fsm.v
-        │       ├── zap_tlb.v
-        │       ├── zap_top.v
-        │       ├── zap_wb_adapter.v
-        │       ├── zap_wb_merger.v
-        │       └── zap_writeback.v
-        ├── scripts
-        │   ├── bin2vlog.pl
-        │   ├── Config.cfg_template
-        │   ├── makefile
-        │   ├── run_sim.pl
-        │   └── uart_input.bash
-        ├── testbench
-        │   ├── chip_top.v
-        │   ├── External_IP
-        │   │   └── uart16550
-        │   │       ├── doc
-        │   │       │   ├── CHANGES.txt
-        │   │       │   ├── src
-        │   │       │   │   └── UART_spec.doc
-        │   │       │   └── UART_spec.pdf
-        │   │       └── rtl
-        │   │           ├── raminfr.v
-        │   │           ├── uart_debug_if.v
-        │   │           ├── uart_defines.v
-        │   │           ├── uart_receiver.v
-        │   │           ├── uart_regs.v
-        │   │           ├── uart_rfifo.v
-        │   │           ├── uart_sync_flops.v
-        │   │           ├── uart_tfifo.v
-        │   │           ├── uart_top.v
-        │   │           ├── uart_transmitter.v
-        │   │           └── uart_wb.v
-        │   ├── ram.v
-        │   ├── timer.v
-        │   ├── uart_rx_logger.v
-        │   ├── uart_tx_dumper.v
-        │   ├── vic.v
-        │   └── zap_tb.v
-        └── ts
-            ├── arm_test
-            │   ├── arm_test.c
-            │   ├── arm_test.ld
-            │   ├── arm_test.s
-            │   ├── Config.cfg
-            │   ├── Description.txt
-            │   └── makefile
-            ├── factorial
-            │   ├── Config.cfg
-            │   ├── Description.txt
-            │   ├── factorial.c
-            │   ├── factorial.ld
-            │   ├── factorial.s
-            │   └── makefile
-            ├── makefile
-            ├── thumb_test
-            │   ├── Config.cfg
-            │   ├── Description.txt
-            │   ├── linker.ld
-            │   ├── main.c
-            │   ├── makefile
-            │   └── thumb.s
-            └── uart
-                ├── Config.cfg
-                ├── Description.txt
-                ├── irq_handler.c
-                ├── main.c
-                ├── makefile
-                ├── uart.c
-                ├── uart.h
-                ├── uart.ld
-                └── uart.s
+        ├── LICENSE
+        ├── makefile
+        ├── README.md
+        └── src
+        
+                ├── rtl
+                │   └── cpu
+                │       ├── zap_alu_main.v
+                │       ├── zap_cache_fsm.v
+                │       ├── zap_cache_tag_ram.v
+                │       ├── zap_cache.v
+                │       ├── zap_core.v
+                │       ├── zap_cp15_cb.v
+                │       ├── zap_decode_main.v
+                │       ├── zap_decode.v
+                │       ├── zap_decompile.v
+                │       ├── zap_defines.vh
+                │       ├── zap_fetch_main.v
+                │       ├── zap_fifo.v
+                │       ├── zap_functions.vh
+                │       ├── zap_issue_main.v
+                │       ├── zap_localparams.vh
+                │       ├── zap_mem_inv_block.v
+                │       ├── zap_memory_main.v
+                │       ├── zap_predecode_compress.v
+                │       ├── zap_predecode_coproc.v
+                │       ├── zap_predecode_main.v
+                │       ├── zap_predecode_mem_fsm.v
+                │       ├── zap_ram_simple.v
+                │       ├── zap_register_file.v
+                │       ├── zap_shifter_main.v
+                │       ├── zap_shifter_multiply.v
+                │       ├── zap_shift_shifter.v
+                │       ├── zap_sync_fifo.v
+                │       ├── zap_thumb_decoder.v
+                │       ├── zap_tlb_check.v
+                │       ├── zap_tlb_fsm.v
+                │       ├── zap_tlb.v
+                │       ├── zap_top.v
+                │       ├── zap_wb_adapter.v
+                │       ├── zap_wb_merger.v
+                │       └── zap_writeback.v
+                ├── scripts
+                │   ├── bin2vlog.pl
+                │   ├── Config.cfg_template
+                │   ├── makefile
+                │   ├── run_sim.pl
+                │   └── uart_input.bash
+                ├── testbench
+                │   ├── chip_top.v
+                │   ├── External_IP
+                │   │   └── uart16550
+                │   │       ├── doc
+                │   │       │   ├── CHANGES.txt
+                │   │       │   ├── src
+                │   │       │   │   └── UART_spec.doc
+                │   │       │   └── UART_spec.pdf
+                │   │       └── rtl
+                │   │           ├── raminfr.v
+                │   │           ├── uart_debug_if.v
+                │   │           ├── uart_defines.v
+                │   │           ├── uart_receiver.v
+                │   │           ├── uart_regs.v
+                │   │           ├── uart_rfifo.v
+                │   │           ├── uart_sync_flops.v
+                │   │           ├── uart_tfifo.v
+                │   │           ├── uart_top.v
+                │   │           ├── uart_transmitter.v
+                │   │           └── uart_wb.v
+                │   ├── ram.v
+                │   ├── timer.v
+                │   ├── uart_rx_logger.v
+                │   ├── uart_tx_dumper.v
+                │   ├── vic.v
+                │   └── zap_tb.v
+                └── ts
+                    ├── arm_test
+                    │   ├── arm_test.c
+                    │   ├── arm_test.ld
+                    │   ├── arm_test.s
+                    │   ├── Config.cfg
+                    │   ├── Description.txt
+                    │   └── makefile
+                    ├── factorial
+                    │   ├── Config.cfg
+                    │   ├── Description.txt
+                    │   ├── factorial.c
+                    │   ├── factorial.ld
+                    │   ├── factorial.s
+                    │   └── makefile
+                    ├── makefile
+                    ├── thumb_test
+                    │   ├── Config.cfg
+                    │   ├── Description.txt
+                    │   ├── linker.ld
+                    │   ├── main.c
+                    │   ├── makefile
+                    │   └── thumb.s
+                    └── uart
+                        ├── Config.cfg
+                        ├── Description.txt
+                        ├── irq_handler.c
+                        ├── main.c
+                        ├── makefile
+                        ├── uart.c
+                        ├── uart.h
+                        ├── uart.ld
+                        └── uart.s
 
 ### Run Sample Tests
 
