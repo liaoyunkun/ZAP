@@ -149,7 +149,7 @@ Wishbone B3 compatible 32-bit bus.
                 │   ├── Config.cfg_template
                 │   ├── makefile
                 │   ├── run_sim.pl
-                │   └── uart_input.bash
+                │   └── uart_input.pl
                 ├── testbench
                 │   ├── chip_top.v
                 │   ├── External_IP
