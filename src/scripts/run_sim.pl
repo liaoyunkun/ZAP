@@ -182,8 +182,8 @@ die "Error: XTerm could not be found!" if system("which xterm");
 
 if ( $TX_TERM0 ) {        die "Failed to open UART TX terminal 0." if system1("xterm -T 'TB UART Output' -hold -e 'cat $UART0_PATH_TX' &");                                                }
 if ( $TX_TERM1 ) {        die "Failed to open UART TX terminal 1." if system1("xterm -T 'TB UART Output' -hold -e 'cat $UART1_PATH_TX' &");                                                }
-if ( $RX_TERM0 ) {        die "Failed to open UART RX terminal 0." if system1("xterm -T 'TB UART Input'  -hold -e 'bash $ZAP_HOME/src/scripts/uart_input.bash $UART0_PATH_RX' &");         }
-if ( $RX_TERM1 ) {        die "Failed to open UART RX terminal 1." if system1("xterm -T 'TB UART Input'  -hold -e 'bash $ZAP_HOME/src/scripts/uart_input.bash $UART1_PATH_RX' &");         }
+if ( $RX_TERM0 ) {        die "Failed to open UART RX terminal 0." if system1("xterm -T 'TB UART Input'  -hold -e 'perl $ZAP_HOME/src/scripts/uart_input.pl | tee -a $UART0_PATH_RX' &");     }
+if ( $RX_TERM1 ) {        die "Failed to open UART RX terminal 1." if system1("xterm -T 'TB UART Input'  -hold -e 'perl $ZAP_HOME/src/scripts/uart_input.pl | tee -a $UART1_PATH_RX' &");     }
 
 #############################################################################################################################################
 # Compile using VVP
